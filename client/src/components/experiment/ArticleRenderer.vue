@@ -464,11 +464,13 @@ export default defineComponent({
   top: 120px;
   max-height: calc(100vh - 140px);
   overflow-y: auto;
-  /* 文章内容最大宽度并居中，右侧自然留出空白放置侧边栏 */
-  max-width: 920px;
+  /* 非 CS 模式（无侧边栏）文章更宽，减少左右空白 */
+  max-width: 1100px;
   margin: 0 auto;
   width: 100%;
 }
+/* CS 模式有侧边栏，文章宽度需要给侧边栏留出空间 */
+.article-panel[data-layout="cs"] { max-width: 1100px; }
 .baseline-article-panel { position: static; max-height: none; overflow: visible; }
 /* 侧边栏固定定位，浮动在视口右侧空白区域，不遮挡文章内容 */
 .annotation-panel {
@@ -552,37 +554,35 @@ export default defineComponent({
 .baseline-empty-comments { padding: 24px 0 8px; color: #8a8f98; text-align: center; }
 .connection-container { position: absolute; top: 0; left: 0; z-index: 10; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
 .connection-line { position: absolute; height: 2px; background: transparent; filter: drop-shadow(0 0 2px rgba(255,87,34,.5)); }
-/* 宽屏：文章 920px 居中，侧边栏 300px 浮动在右侧空白 */
-@media (min-width: 1500px) {
-  .article-panel { max-width: 920px; }
+/* 超宽屏 >= 1800px：CS 模式文章 1100px，侧边栏 300px */
+@media (min-width: 1800px) {
+  .article-panel[data-layout="cs"] { max-width: 1100px; }
   .annotation-panel { width: 300px; right: 24px; }
 }
-/* 中宽屏：文章 820px，侧边栏 280px */
-@media (max-width: 1499px) and (min-width: 1300px) {
-  .article-panel { max-width: 820px; }
+/* 1600-1799px：CS 模式文章 960px，侧边栏 280px */
+@media (max-width: 1799px) and (min-width: 1600px) {
+  .article-panel[data-layout="cs"] { max-width: 960px; }
   .annotation-panel { width: 280px; right: 20px; }
 }
-/* 中等屏幕：文章 720px，侧边栏 260px */
-@media (max-width: 1299px) and (min-width: 1100px) {
-  .article-panel { max-width: 720px; }
+/* 1400-1599px：CS 模式文章 820px，侧边栏 260px */
+@media (max-width: 1599px) and (min-width: 1400px) {
+  .article-panel[data-layout="cs"] { max-width: 820px; }
   .annotation-panel { width: 260px; right: 16px; }
 }
-/* 较窄屏幕：全局评论面板隐藏，文章 680px，侧边栏 240px */
-@media (max-width: 1099px) and (min-width: 960px) {
-  .main-content.has-global-comments { grid-template-columns: minmax(0, 1fr); grid-template-areas: "article"; }
-  .global-comments-panel { display: none; }
-  .article-panel { max-width: 680px; }
+/* 1200-1399px：CS 模式文章 680px，侧边栏 240px */
+@media (max-width: 1399px) and (min-width: 1200px) {
+  .article-panel[data-layout="cs"] { max-width: 680px; }
   .annotation-panel { width: 240px; right: 12px; }
 }
-/* 小屏幕：侧边栏回退到正常流，堆叠在文章下方，避免覆盖 */
-@media (max-width: 959px) {
+/* <1200px：侧边栏回退到正常流，堆叠在文章下方，避免覆盖 */
+@media (max-width: 1199px) {
   .main-content, .main-content.has-global-comments, .main-content.has-annotation-panel, .main-content.has-global-comments.has-annotation-panel {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas: "article" "global" "annotation";
   }
   .global-comments-panel, .article-panel { position: static; max-height: none; }
   .global-comments-panel { display: block; }
-  .article-panel { max-width: 100%; }
+  .article-panel, .article-panel[data-layout="cs"] { max-width: 100%; }
   .annotation-panel {
     position: static !important;
     width: 100%;
