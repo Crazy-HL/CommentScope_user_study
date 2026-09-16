@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Database
+server/data/*.sqlite3
+server/data/*.sqlite3-*
+server/data/*.db
+server/backups/
+
+# Build output
+client/dist/
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Cache
+.pytest_cache/
+client/.pytest_cache/
