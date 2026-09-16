@@ -130,31 +130,71 @@
 
     </template>
 
-    <div class="admin-overview-columns admin-participant-task-details">
-      <article v-for="task in participantTasks" :key="task.session_id" class="admin-panel admin-overview-callout">
-        <div class="admin-kicker">Participant-level tasks</div>
-        <h3>偏好与访谈 · {{ task.session_id }}</h3>
-        <div v-if="task.preference" class="admin-participant-task-block">
-          <strong>偏好排序</strong>
-          <p>{{ task.preference.ranking?.join(" → ") || "—" }}</p>
-          <p>首选界面：<strong>{{ task.preference.preferred_condition || "—" }}</strong></p>
-          <p>偏好理由：{{ task.preference.reason || "—" }}</p>
-          <small>提交时间：{{ formatDate(task.preference.submitted_at) }}</small>
+    <div class="admin-participant-task-details">
+      <article v-for="task in participantTasks" :key="task.session_id" class="admin-panel task-detail-card">
+        <div class="task-detail-header">
+          <div class="admin-kicker">参与者级任务</div>
+          <h3>偏好与访谈</h3>
         </div>
-        <div v-else class="admin-empty-state compact">尚未提交偏好排序。</div>
-        <div v-if="task.interview" class="admin-participant-task-block">
-          <strong>半结构化访谈</strong>
-          <div v-for="(answer, question) in task.interview.answers" :key="question" class="admin-interview-answer"><span>{{ question }}</span><p>{{ answer }}</p></div>
-          <small>提交时间：{{ formatDate(task.interview.submitted_at) }}</small>
+
+        <!-- 偏好排序 -->
+        <div class="task-section">
+          <div class="task-section-title">
+            <span class="task-section-icon">📋</span>
+            <span>界面偏好排序</span>
+            <span v-if="task.preference" class="task-submit-time">{{ formatDate(task.preference.submitted_at) }}</span>
+          </div>
+          <div v-if="task.preference" class="preference-content">
+            <div class="preference-ranking">
+              <span class="preference-label">排序：</span>
+              <div class="preference-badges">
+                <template v-for="(cond, idx) in task.preference.ranking" :key="cond">
+                  <span class="condition-badge" :class="`condition-${cond.toLowerCase()}`">{{ cond }}</span>
+                  <span v-if="idx < task.preference.ranking.length - 1" class="preference-arrow">→</span>
+                </template>
+              </div>
+            </div>
+            <div class="preference-favorite">
+              <span class="preference-label">首选：</span>
+              <span class="condition-badge condition-favorite" :class="`condition-${task.preference.preferred_condition?.toLowerCase()}`">{{ task.preference.preferred_condition || "—" }}</span>
+            </div>
+            <div class="preference-reason">
+              <span class="preference-label">理由：</span>
+              <p class="preference-reason-text">{{ task.preference.reason || "—" }}</p>
+            </div>
+          </div>
+          <div v-else class="admin-empty-state compact">尚未提交偏好排序。</div>
         </div>
-        <div v-else class="admin-empty-state compact">尚未提交访谈回答。</div>
+
+        <!-- 半结构化访谈 -->
+        <div class="task-section">
+          <div class="task-section-title">
+            <span class="task-section-icon">💬</span>
+            <span>半结构化访谈</span>
+            <span v-if="task.interview" class="task-submit-time">{{ formatDate(task.interview.submitted_at) }}</span>
+          </div>
+          <div v-if="task.interview" class="interview-content">
+            <div v-for="(question, qIndex) in interviewQuestions" :key="qIndex" class="interview-qa-item">
+              <div class="interview-question">
+                <span class="interview-q-num">Q{{ qIndex + 1 }}</span>
+                <span class="interview-q-text">{{ question }}</span>
+              </div>
+              <div class="interview-answer">
+                {{ task.interview.answers[`q${qIndex + 1}`] || "—" }}
+              </div>
+            </div>
+          </div>
+          <div v-else class="admin-empty-state compact">尚未提交访谈回答。</div>
+        </div>
       </article>
     </div>
   </section>
 </template>
 
 <script setup>
+import { INTERVIEW_QUESTIONS } from "../../experiment/experimentConfig";
 const articleDisplayLabels = { A02: "01", A03: "02", A04: "03", A07: "04" };
+const interviewQuestions = INTERVIEW_QUESTIONS;
 
 defineProps({
   participantId: { type: String, default: "" },
@@ -240,4 +280,38 @@ function subjectiveBars(workload) {
 .admin-participant-workload-meta { grid-column: 1 / -1; }
 .admin-participant-workload-meta dt { margin-bottom: 8px; }
 .admin-participant-workload-meta dd { margin: 0; }
+
+/* 偏好与访谈卡片 */
+.admin-participant-task-details { margin-top: 20px; display: flex; flex-direction: column; gap: 16px; }
+.task-detail-card { padding: 0; overflow: hidden; }
+.task-detail-header { padding: 16px 20px; border-bottom: 1px solid #e2eaed; background: #f7faf9; }
+.task-detail-header h3 { margin: 4px 0 0; color: #17324d; font-size: 17px; }
+.task-section { padding: 18px 20px; border-bottom: 1px solid #eef3f4; }
+.task-section:last-child { border-bottom: none; }
+.task-section-title { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; font-size: 14px; font-weight: 700; color: #2c4a5e; }
+.task-section-icon { font-size: 16px; }
+.task-submit-time { margin-left: auto; font-size: 11px; font-weight: 400; color: #8a9aa2; }
+
+/* 偏好排序 */
+.preference-content { display: flex; flex-direction: column; gap: 12px; }
+.preference-ranking, .preference-favorite { display: flex; align-items: center; gap: 8px; }
+.preference-label { flex-shrink: 0; width: 40px; font-size: 13px; color: #6b7f8f; font-weight: 600; }
+.preference-badges { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.preference-arrow { color: #9fb0b8; font-weight: 700; font-size: 14px; }
+.condition-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 26px; padding: 0 10px; border-radius: 6px; font-size: 12px; font-weight: 800; color: #fff; }
+.condition-te { background: #2b7a78; }
+.condition-cs { background: #c0792e; }
+.condition-se { background: #5a6fa8; }
+.condition-bl { background: #8b5a8b; }
+.condition-favorite { box-shadow: 0 0 0 2px rgba(43,122,120,.3); }
+.preference-reason { display: flex; gap: 8px; }
+.preference-reason-text { margin: 0; flex: 1; padding: 10px 14px; background: #f0f6f7; border-left: 3px solid #2b7a78; border-radius: 0 8px 8px 0; color: #3a5566; font-size: 13px; line-height: 1.7; }
+
+/* 访谈问答 */
+.interview-content { display: flex; flex-direction: column; gap: 14px; }
+.interview-qa-item { background: #fafcfc; border: 1px solid #e6edef; border-radius: 10px; overflow: hidden; }
+.interview-question { display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px; background: #f0f6f7; border-bottom: 1px solid #e2eaed; }
+.interview-q-num { flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 22px; border-radius: 4px; background: #2b7a78; color: #fff; font-size: 11px; font-weight: 800; }
+.interview-q-text { flex: 1; font-size: 13px; font-weight: 700; color: #2c4a5e; line-height: 1.5; }
+.interview-answer { padding: 12px 14px; font-size: 13px; color: #4a6274; line-height: 1.8; white-space: pre-wrap; }
 </style>
