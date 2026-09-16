@@ -464,13 +464,24 @@ export default defineComponent({
 .baseline-layout { width: 100%; }
 .main-content { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: "article"; gap: 12px; width: 100%; }
 .main-content.has-global-comments { grid-template-columns: 220px minmax(0, 1fr); grid-template-areas: "global article"; }
-.main-content.has-annotation-panel { grid-template-columns: minmax(0, 1fr) 280px; grid-template-areas: "article annotation"; }
-.main-content.has-global-comments.has-annotation-panel { grid-template-columns: 220px minmax(0, 1fr) 280px; grid-template-areas: "global article annotation"; }
+/* 侧边栏浮动定位，不挤占文章宽度 */
+.main-content.has-annotation-panel { grid-template-columns: minmax(0, 1fr); grid-template-areas: "article"; }
+.main-content.has-global-comments.has-annotation-panel { grid-template-columns: 220px minmax(0, 1fr); grid-template-areas: "global article"; }
 .panel { box-sizing: border-box; padding: 14px; height: fit-content; border-radius: 8px; background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,.1); }
 .global-comments-panel { grid-area: global; position: sticky; top: 120px; max-height: calc(100vh - 140px); overflow-y: auto; }
 .article-panel { grid-area: article; position: sticky; top: 120px; max-height: calc(100vh - 140px); overflow-y: auto; }
 .baseline-article-panel { position: static; max-height: none; overflow: visible; }
-.annotation-panel { grid-area: annotation; max-height: calc(100vh - 180px); overflow-y: auto; }
+/* 侧边栏固定定位，浮动在视口右侧空白区域，不影响文章宽度 */
+.annotation-panel {
+  position: fixed;
+  right: 20px;
+  top: 120px;
+  width: 300px;
+  max-height: calc(100vh - 180px);
+  overflow-y: auto;
+  z-index: 20;
+  box-shadow: 0 4px 20px rgba(0,0,0,.15);
+}
 .article-title { margin: 0 0 10px; color: #222; font-size: 24px; line-height: 1.3; }
 .article-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; color: #6b7280; font-size: 13px; }
 .article-content { color: #333; font-size: 16px; line-height: 1.7; }
@@ -542,15 +553,30 @@ export default defineComponent({
 .baseline-empty-comments { padding: 24px 0 8px; color: #8a8f98; text-align: center; }
 .connection-container { position: absolute; top: 0; left: 0; z-index: 10; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
 .connection-line { position: absolute; height: 2px; background: transparent; filter: drop-shadow(0 0 2px rgba(255,87,34,.5)); }
+@media (max-width: 1400px) {
+  /* 中等屏幕：侧边栏宽度略减，仍浮动在右侧 */
+  .annotation-panel { width: 260px; right: 12px; }
+}
 @media (max-width: 1180px) {
-  .main-content.has-global-comments.has-annotation-panel { grid-template-columns: minmax(0, 1fr) 260px; grid-template-areas: "article annotation"; }
   .main-content.has-global-comments { grid-template-columns: 200px minmax(0, 1fr); }
   .global-comments-panel { display: none; }
+  .annotation-panel { width: 240px; right: 8px; }
 }
 @media (max-width: 900px) {
-  .main-content, .main-content.has-global-comments, .main-content.has-annotation-panel, .main-content.has-global-comments.has-annotation-panel { grid-template-columns: minmax(0, 1fr); grid-template-areas: "article" "global" "annotation"; }
-  .global-comments-panel, .article-panel, .annotation-panel { position: static; max-height: none; }
+  /* 小屏幕：侧边栏回退到正常流，堆叠在文章下方，避免覆盖 */
+  .main-content, .main-content.has-global-comments, .main-content.has-annotation-panel, .main-content.has-global-comments.has-annotation-panel {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "article" "global" "annotation";
+  }
+  .global-comments-panel, .article-panel { position: static; max-height: none; }
   .global-comments-panel { display: block; }
+  .annotation-panel {
+    position: static !important;
+    width: 100%;
+    max-height: none;
+    margin-top: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.1);
+  }
 }
 @media (max-width: 640px) {
   .article-container { padding: 8px 0; }
