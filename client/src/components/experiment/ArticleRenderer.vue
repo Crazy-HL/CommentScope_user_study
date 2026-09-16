@@ -72,7 +72,7 @@
                     <span
                       :id="`sentence-${sentence.index}`"
                       class="sentence"
-                      :class="{ 'has-comment': mode === 'cs' && hasSentenceComments(sentence.index), selected: mode === 'cs' && activeSentence === sentence.index }"
+                      :class="{ 'has-comment': hasSentenceComments(sentence.index), selected: mode === 'cs' && activeSentence === sentence.index }"
                       :role="(mode === 'cs' && hasSentenceComments(sentence.index)) ? 'button' : undefined"
                       :tabindex="(mode === 'cs' && hasSentenceComments(sentence.index)) ? 0 : undefined"
                       @click="(mode === 'cs' && hasSentenceComments(sentence.index)) ? toggleSentence(sentence.index) : undefined"
@@ -491,8 +491,16 @@ export default defineComponent({
 .paragraph-text { position: relative; margin: 0 0 1em; text-indent: 2em; line-height: 1.7; }
 .sentence-wrapper { position: static; }
 .sentence { display: inline; padding: 0 1px 2px; border-radius: 3px; white-space: pre-wrap; transition: background .2s, border .2s; }
-.sentence.has-comment { border-bottom: 1.5px dotted rgba(0,123,255,.7); cursor: pointer; }
-.sentence.has-comment:hover, .sentence.selected { border-bottom-style: solid; border-bottom-color: rgba(0,86,179,.8); background: rgba(255,236,179,.6); }
+/* 所有模式下有评论的句子都下划线标识 */
+.sentence.has-comment { border-bottom: 1.5px dotted rgba(0,123,255,.7); }
+/* 只有 CS 模式下可点击、有悬停和选中效果 */
+.article-panel[data-layout="cs"] .sentence.has-comment { cursor: pointer; }
+.article-panel[data-layout="cs"] .sentence.has-comment:hover,
+.article-panel[data-layout="cs"] .sentence.selected {
+  border-bottom-style: solid;
+  border-bottom-color: rgba(0,86,179,.8);
+  background: rgba(255,236,179,.6);
+}
 .annotation-marker { margin-left: 2px; color: #007bff; font-size: .7em; font-weight: 700; }
 .inline-comment {
   display: inline;
