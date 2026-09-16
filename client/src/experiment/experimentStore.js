@@ -63,16 +63,5 @@ export function createExperimentStore() {
     state.responses = [];
   }
 
-  // 清除本机标识并重新生成，用于同一台电脑轮换给不同参与者答题
-  function resetClientInstance() {
-    localStorage.removeItem(CLIENT_KEY);
-    localStorage.removeItem(SESSION_KEY);
-    state.clientInstanceId = persistentId();
-    state.session = null;
-    state.articles = [];
-    state.responses = [];
-    state.error = "";
-  }
-
-  return { state, hydrate, resumeSaved, start, clearLocalSession, resetClientInstance };
+  return { state, hydrate, resumeSaved, start, clearLocalSession };
 }

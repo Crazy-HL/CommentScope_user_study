@@ -29,7 +29,7 @@ const conditionLabel = computed(() => props.renderMode ? conditionLabelForRender
 
 function handleExit() {
   const confirmed = window.confirm(
-    "确定要退出当前实验吗？\n\n退出后当前进度将保存在服务器上，但本浏览器将无法继续，需要联系研究者重置后才能继续。\n\n如果是要更换参与者编号，退出后可以在选择页面点击「清除本机记录，切换参与者」。"
+    "确定要退出当前实验吗？\n\n退出后当前进度将保存在服务器上，本浏览器可以选择继续之前的实验，或选择其他可用的参与者编号。\n\n如需重置进行中的参与者，请联系研究者通过管理员后台操作。"
   );
   if (confirmed) emit("exit");
 }

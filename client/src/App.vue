@@ -13,7 +13,6 @@
       :api="api"
       :client-instance-id="state.clientInstanceId"
       @started="acceptPayload"
-      @reset="resetAndReturnToPicker"
     />
 
     <main v-else-if="booting" class="status-page"><p>正在恢复实验进度…</p></main>
@@ -85,11 +84,6 @@
           <div class="check">✓</div>
           <h1>实验已完成</h1>
           <p>你的所有作答和操作数据已经保存。感谢参与！</p>
-          <div class="complete-actions">
-            <button type="button" class="new-experiment-btn" @click="resetAndReturnToPicker">
-              开始新实验（切换参与者）
-            </button>
-          </div>
         </section>
       </main>
 
@@ -197,15 +191,9 @@ function showCompletion() {
   state.session = { ...state.session, status: "completed", current_stage: "complete" };
 }
 
-function resetAndReturnToPicker() {
-  store.resetClientInstance();
-  fatalError.value = "";
-}
-
 function handleExitExperiment() {
   // 退出当前实验，清除本地会话，回到选择页面
   // 注意：不清除 client_instance_id，用户可以选择继续之前的实验
-  // 如果要切换参与者，可在选择页面点击「清除本机记录，切换参与者」
   store.clearLocalSession();
   fatalError.value = "";
 }
@@ -241,8 +229,5 @@ button:focus-visible, select:focus-visible, textarea:focus-visible, input:focus-
 .status-page { min-height: 100vh; display: grid; place-items: center; padding: 24px; color: #536c7d; background: #f4f7f9; }
 .complete-page section { width: min(560px, 100%); padding: 42px; text-align: center; border: 1px solid #d7e5e7; border-radius: 18px; background: white; box-shadow: 0 16px 48px rgba(34,70,82,.1); }
 .complete-page h1 { color: #17324d; }.check { width: 72px; height: 72px; display: grid; place-items: center; margin: auto; border-radius: 50%; color: white; background: #2f8b76; font-size: 40px; }
-.complete-actions { margin-top: 28px; padding-top: 22px; border-top: 1px dashed #d0dde5; }
-.new-experiment-btn { width: 100%; min-height: 48px; padding: 12px 20px; border: 0; border-radius: 10px; color: white; background: #236b78; font-size: 15px; font-weight: 700; cursor: pointer; transition: background .2s; }
-.new-experiment-btn:hover { background: #1a5a66; }
 .fatal-error { position: fixed; z-index: 100; right: 18px; bottom: 18px; max-width: 460px; padding: 12px 16px; color: #8b1e2d; background: #fff0f1; border: 1px solid #edc4ca; border-radius: 9px; box-shadow: 0 8px 24px rgba(80,30,38,.15); }
 </style>
