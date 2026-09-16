@@ -55,9 +55,10 @@
             <div><dt>Session ID</dt><dd>{{ detail.session_id }}</dd></div>
             <div><dt>阅读开始</dt><dd>{{ formatDate(detail.reading_start_time) }}</dd></div>
             <div><dt>阅读结束</dt><dd>{{ formatDate(detail.reading_end_time) }}</dd></div>
-            <div><dt>总滚动距离</dt><dd>{{ formatNumber(detail.total_scroll_distance_px, 1) }} px</dd></div>
-            <div><dt>最大滚动位置</dt><dd>{{ formatNumber(detail.max_scroll_y, 1) }} px</dd></div>
-            <div><dt>评论点击 / 打开 / 关闭</dt><dd>{{ detail.comment_click_count ?? 0 }} / {{ detail.comment_open_count ?? 0 }} / {{ detail.comment_close_count ?? 0 }}</dd></div>
+            <div><dt>总滚动距离</dt><dd>{{ formatScrollDistance(detail.total_scroll_distance_px) }}</dd></div>
+            <div><dt>最大滚动位置</dt><dd>{{ formatScrollDistance(detail.max_scroll_y) }}</dd></div>
+            <div><dt>评论卡片点击</dt><dd>{{ detail.comment_click_count ?? 0 }} 次</dd></div>
+            <div><dt>侧边栏打开 / 关闭</dt><dd>{{ detail.comment_open_count ?? 0 }} / {{ detail.comment_close_count ?? 0 }} 次</dd></div>
             <div><dt>段落评论操作</dt><dd>{{ detail.paragraph_toggle_count ?? 0 }}</dd></div>
             <div class="admin-participant-workload-meta"><dt>NASA-TLX / 主观评价</dt><dd>{{ workloadSummary(detail.workload) }}</dd><small v-if="detail.workload">Physical {{ detail.workload.physical_demand ?? "—" }} · Temporal {{ detail.workload.temporal_demand ?? "—" }} · Performance {{ detail.workload.performance ?? "—" }} · RC {{ detail.workload.reading_continuity ?? "—" }} · CA {{ detail.workload.comment_accessibility ?? "—" }}</small></div>
           </dl>
@@ -73,12 +74,12 @@
                     <td>{{ response.question_id }}</td>
                     <td>{{ response.selected_option }}</td>
                     <td>{{ response.correct ? "正确" : "错误" }}</td>
-                    <td>{{ response.item_start_time || "—" }}</td>
-                    <td>{{ response.submit_time || "—" }}</td>
+                    <td>{{ formatDate(response.item_start_time) }}</td>
+                    <td>{{ formatDate(response.submit_time) }}</td>
                     <td>{{ formatMilliseconds(response.elapsed_ms) }}</td>
                     <td>{{ response.option_click_count ?? 0 }}</td>
                     <td>{{ response.option_change_count ?? 0 }}</td>
-                    <td>{{ response.scroll_event_count ?? 0 }} 次 / {{ formatNumber(response.total_scroll_distance_px, 1) }} px</td>
+                    <td>{{ response.scroll_event_count ?? 0 }} 次 / {{ formatScrollDistance(response.total_scroll_distance_px) }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -93,7 +94,7 @@
                 <thead><tr><th>时间</th><th>事件</th><th>阶段</th><th>题目</th><th>事件载荷</th></tr></thead>
                 <tbody>
                   <tr v-for="event in detail.events" :key="event.event_row_id">
-                    <td>{{ event.client_occurred_at }}</td><td>{{ event.event_type }}</td><td>{{ event.stage || "—" }}</td><td>{{ event.question_id || "—" }}</td><td class="admin-json-cell">{{ stringify(event.payload) }}</td>
+                    <td>{{ formatDate(event.client_occurred_at) }}</td><td>{{ event.event_type }}</td><td>{{ event.stage || "—" }}</td><td>{{ event.question_id || "—" }}</td><td class="admin-json-cell">{{ stringify(event.payload) }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -142,8 +143,10 @@ function formatMilliseconds(value) { return value == null || Number.isNaN(Number
 function formatScore(value) { return formatNumber(value, 2); }
 function formatRating(value) { return formatNumber(value, 1); }
 function formatDate(value) {
-  if (!value) return "—";
-  const date = new Date(value);
+  if (!value && value !== 0) return "—";
+  // 处理纯数字字符串形式的毫秒时间戳
+  const timestamp = typeof value === "string" && /^\d+$/.test(value) ? Number(value) : value;
+  const date = new Date(timestamp);
   if (Number.isNaN(date.getTime())) return String(value);
   return date.toLocaleString("zh-CN", {
     year: "numeric",
@@ -154,6 +157,14 @@ function formatDate(value) {
     second: "2-digit",
     hour12: false
   });
+}
+function formatScrollDistance(value) {
+  if (value == null || Number.isNaN(Number(value))) return "—";
+  const px = Number(value);
+  if (px < 1000) return `${px.toFixed(0)} px`;
+  // 大于1000px时同时显示米和像素，更直观
+  const meters = px / 1000;
+  return `${meters.toFixed(2)} m（${px.toFixed(0)} px）`;
 }
 function statusLabel(status) { return status === "completed" ? "已完成" : status === "active" ? "进行中" : status === "pending" ? "未开始" : (status || "—"); }
 function flattenResponses(responses = {}) { return Object.values(responses).flat().sort((a, b) => String(a.question_type).localeCompare(String(b.question_type)) || String(a.question_id).localeCompare(String(b.question_id))); }

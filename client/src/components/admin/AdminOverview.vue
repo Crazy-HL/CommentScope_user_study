@@ -464,6 +464,8 @@ function openParticipantDrawer(participantId) {
 
 function closeParticipantDrawer() {
   drawerOpen.value = false;
+  // 关闭抽屉后清除参与者筛选，让热力图和表格恢复显示全部
+  filters.participant_id = "";
 }
 
 function handleParticipantFilterChange() {
