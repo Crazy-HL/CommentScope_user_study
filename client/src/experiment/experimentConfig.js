@@ -7,6 +7,18 @@ export const PARTICIPANT_IDS = Object.freeze([
 
 // Internal codes are never rendered as participant-facing labels.
 export const CONDITION_CODES = Object.freeze(["TE", "CS", "SE", "BL"]);
+
+// Render mode (opaque server-side identifier) to human-readable condition label.
+export const RENDER_MODE_LABELS = Object.freeze({
+  layout_a: "Text-End (TE)",
+  layout_b: "Click-to-Show (CS)",
+  layout_c: "Sentence-End (SE)",
+  layout_d: "Between-Line (BL)"
+});
+
+export function conditionLabelForRenderMode(renderMode) {
+  return RENDER_MODE_LABELS[renderMode] || "未知界面";
+}
 export const PREFERENCE_OPTIONS = Object.freeze([
   { value: "TE", label: "界面 1（评论集中显示）" },
   { value: "CS", label: "界面 2（点击标记查看评论）" },

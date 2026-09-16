@@ -22,6 +22,7 @@
         :participant-id="state.session.participant_id"
         :article-order="headerArticleOrder"
         :stage="state.session.current_stage"
+        :render-mode="currentArticle?.render_mode || ''"
       />
 
       <InstructionStage

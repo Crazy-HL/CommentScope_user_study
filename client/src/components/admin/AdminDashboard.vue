@@ -224,7 +224,7 @@ const participantTasks = computed(() => summary.value?.participant_tasks || []);
 const subjectiveChartSeries = computed(() => Object.fromEntries(subjectiveMetrics.map(item => [item.name, academicMetricSeries(item.name)])));
 const continuityChartSeries = computed(() => Object.fromEntries(subjectiveMetrics.slice(0, 2).map(item => [item.name, academicMetricSeries(item.name)])));
 const qualityIssues = computed(() => quality.value?.issues || []);
-const lastUpdatedText = computed(() => summary.value?.last_updated_at ? `最近活动：${summary.value.last_updated_at}` : "暂无实验数据");
+const lastUpdatedText = computed(() => summary.value?.last_updated_at ? `最近活动：${formatDate(summary.value.last_updated_at)}` : "暂无实验数据");
 
 function metric(name) { return summary.value?.metrics?.[name] || {}; }
 function academicMetricSeries(name) { return showDemoData.value ? (DEMO_ACADEMIC_METRICS[name] || { }) : buildMetricSeriesFromSummary(summary.value, name); }
@@ -232,6 +232,12 @@ function formatNumber(value) { return Number(value).toFixed(2); }
 function formatAccuracy(value) { return Number(value).toFixed(2); }
 function formatRating(value) { return Number(value).toFixed(1); }
 function formatSeconds(value) { return `${(Number(value) / 1000).toFixed(2)}`; }
+function formatDate(value) {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return date.toLocaleString("zh-CN", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+}
 function preferenceRank(condition) { return preference.value.rank?.[condition]?.mean == null ? "—" : Number(preference.value.rank[condition].mean).toFixed(2); }
 function clearFilters() { filters.value = { participant_id: "", article_id: "", condition: "", status: "" }; loadAll(); }
 

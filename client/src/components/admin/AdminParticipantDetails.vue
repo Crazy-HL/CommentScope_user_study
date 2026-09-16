@@ -53,8 +53,8 @@
           </div>
           <dl class="admin-participant-meta-grid">
             <div><dt>Session ID</dt><dd>{{ detail.session_id }}</dd></div>
-            <div><dt>阅读开始</dt><dd>{{ detail.reading_start_time || "—" }}</dd></div>
-            <div><dt>阅读结束</dt><dd>{{ detail.reading_end_time || "—" }}</dd></div>
+            <div><dt>阅读开始</dt><dd>{{ formatDate(detail.reading_start_time) }}</dd></div>
+            <div><dt>阅读结束</dt><dd>{{ formatDate(detail.reading_end_time) }}</dd></div>
             <div><dt>总滚动距离</dt><dd>{{ formatNumber(detail.total_scroll_distance_px, 1) }} px</dd></div>
             <div><dt>最大滚动位置</dt><dd>{{ formatNumber(detail.max_scroll_y, 1) }} px</dd></div>
             <div><dt>评论点击 / 打开 / 关闭</dt><dd>{{ detail.comment_click_count ?? 0 }} / {{ detail.comment_open_count ?? 0 }} / {{ detail.comment_close_count ?? 0 }}</dd></div>
@@ -113,13 +113,13 @@
           <p>{{ task.preference.ranking?.join(" → ") || "—" }}</p>
           <p>首选界面：<strong>{{ task.preference.preferred_condition || "—" }}</strong></p>
           <p>偏好理由：{{ task.preference.reason || "—" }}</p>
-          <small>提交时间：{{ task.preference.submitted_at || "—" }}</small>
+          <small>提交时间：{{ formatDate(task.preference.submitted_at) }}</small>
         </div>
         <div v-else class="admin-empty-state compact">尚未提交偏好排序。</div>
         <div v-if="task.interview" class="admin-participant-task-block">
           <strong>半结构化访谈</strong>
           <div v-for="(answer, question) in task.interview.answers" :key="question" class="admin-interview-answer"><span>{{ question }}</span><p>{{ answer }}</p></div>
-          <small>提交时间：{{ task.interview.submitted_at || "—" }}</small>
+          <small>提交时间：{{ formatDate(task.interview.submitted_at) }}</small>
         </div>
         <div v-else class="admin-empty-state compact">尚未提交访谈回答。</div>
       </article>
@@ -141,6 +141,20 @@ function formatNumber(value, digits = 2) { return value == null || Number.isNaN(
 function formatMilliseconds(value) { return value == null || Number.isNaN(Number(value)) ? "—" : `${formatNumber(Number(value) / 1000, 2)} s`; }
 function formatScore(value) { return formatNumber(value, 2); }
 function formatRating(value) { return formatNumber(value, 1); }
+function formatDate(value) {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return date.toLocaleString("zh-CN", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false
+  });
+}
 function statusLabel(status) { return status === "completed" ? "已完成" : status === "active" ? "进行中" : status === "pending" ? "未开始" : (status || "—"); }
 function flattenResponses(responses = {}) { return Object.values(responses).flat().sort((a, b) => String(a.question_type).localeCompare(String(b.question_type)) || String(a.question_id).localeCompare(String(b.question_id))); }
 function stringify(value) { return value == null ? "—" : JSON.stringify(value); }

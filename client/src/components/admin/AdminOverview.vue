@@ -321,7 +321,7 @@ const participantDetails = computed(() => effectiveSummary.value?.participant_de
 const participantOverview = computed(() => effectiveSummary.value?.participant_overview || []);
 const participantTasks = computed(() => effectiveSummary.value?.participant_tasks || []);
 const participantOptions = computed(() => effectiveSummary.value?.filter_options?.participants || []);
-const lastUpdatedText = computed(() => effectiveSummary.value?.last_updated_at ? `最近活动：${effectiveSummary.value.last_updated_at}` : "暂无实验数据");
+const lastUpdatedText = computed(() => effectiveSummary.value?.last_updated_at ? `最近活动：${formatDate(effectiveSummary.value.last_updated_at)}` : "暂无实验数据");
 const visibleConditions = computed(() => filters.condition ? [filters.condition] : conditions);
 const apiFilters = computed(() => {
   const next = Object.fromEntries(Object.entries(filters).filter(([key, value]) => key !== "dataSection" && value));
@@ -377,6 +377,12 @@ function formatAccuracy(value) { return formatNumber(value, 2); }
 function formatRating(value) { return formatNumber(value, 1); }
 function formatSeconds(value) { return formatNumber(Number(value) / 1000, 2); }
 function formatNumber(value, digits = 2) { return value == null || Number.isNaN(Number(value)) ? "—" : Number(value).toFixed(digits); }
+function formatDate(value) {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return date.toLocaleString("zh-CN", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+}
 function metricValue(name, condition, formatter, suffix = "") {
   const item = metrics.value[name]?.[condition];
   return item?.mean == null ? "—" : `${formatter(item.mean)}${suffix}`;
