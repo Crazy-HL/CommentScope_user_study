@@ -24,6 +24,7 @@
         :article-order="headerArticleOrder"
         :stage="state.session.current_stage"
         :render-mode="currentArticle?.render_mode || ''"
+        @exit="handleExitExperiment"
       />
 
       <InstructionStage
@@ -198,6 +199,14 @@ function showCompletion() {
 
 function resetAndReturnToPicker() {
   store.resetClientInstance();
+  fatalError.value = "";
+}
+
+function handleExitExperiment() {
+  // 退出当前实验，清除本地会话，回到选择页面
+  // 注意：不清除 client_instance_id，用户可以选择继续之前的实验
+  // 如果要切换参与者，可在选择页面点击「清除本机记录，切换参与者」
+  store.clearLocalSession();
   fatalError.value = "";
 }
 

@@ -8,6 +8,7 @@
       <span v-if="conditionLabel" class="condition-label">{{ conditionLabel }}</span>
       <span v-if="articleOrder" class="progress-text">文章 {{ articleOrder }} / 4 · {{ stageTitle }}</span>
       <span v-else class="progress-text">{{ stageTitle }}</span>
+      <button v-if="participantId" type="button" class="exit-btn" @click="handleExit" title="退出当前实验，返回选择页面">退出实验</button>
     </div>
   </header>
 </template>
@@ -22,8 +23,16 @@ const props = defineProps({
   stage: { type: String, default: "instruction" },
   renderMode: { type: String, default: "" }
 });
+const emit = defineEmits(["exit"]);
 const stageTitle = computed(() => STAGE_TITLES[props.stage] || "实验进行中");
 const conditionLabel = computed(() => props.renderMode ? conditionLabelForRenderMode(props.renderMode) : "");
+
+function handleExit() {
+  const confirmed = window.confirm(
+    "确定要退出当前实验吗？\n\n退出后当前进度将保存在服务器上，但本浏览器将无法继续，需要联系研究者重置后才能继续。\n\n如果是要更换参与者编号，退出后可以在选择页面点击「清除本机记录，切换参与者」。"
+  );
+  if (confirmed) emit("exit");
+}
 </script>
 
 <style scoped>
@@ -33,6 +42,21 @@ const conditionLabel = computed(() => props.renderMode ? conditionLabelForRender
 .participant { margin-left: 12px; padding: 3px 9px; border-radius: 999px; color: #35536f; background: #eef4f8; font-size: 13px; }
 .condition-label { padding: 5px 12px; border-radius: 6px; color: #fff; background: linear-gradient(135deg, #2b7a78, #1a5f5d); font-size: 13px; font-weight: 700; white-space: nowrap; }
 .progress-text { color: #526b82; font-size: 14px; }
+.exit-btn {
+  padding: 5px 12px;
+  border: 1px solid #c9d6de;
+  border-radius: 6px;
+  color: #8b1e2d;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+}
+.exit-btn:hover {
+  border-color: #8b1e2d;
+  background: #fff0f1;
+}
 @media (max-width: 640px) {
   .progress-header { padding: 12px 14px; flex-wrap: wrap; }
   .header-right { gap: 8px; flex-wrap: wrap; }
