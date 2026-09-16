@@ -72,42 +72,30 @@
                     <span
                       :id="`sentence-${sentence.index}`"
                       class="sentence"
-                      :class="{ 'has-comment': hasSentenceComments(sentence.index), selected: activeSentence === sentence.index }"
-                      :role="hasSentenceComments(sentence.index) ? 'button' : undefined"
-                      :tabindex="hasSentenceComments(sentence.index) ? 0 : undefined"
-                      @click="hasSentenceComments(sentence.index) ? toggleSentence(sentence.index) : undefined"
-                      @keydown.enter.prevent="hasSentenceComments(sentence.index) ? toggleSentence(sentence.index) : undefined"
-                      @keydown.space.prevent="hasSentenceComments(sentence.index) ? toggleSentence(sentence.index) : undefined">
+                      :class="{ 'has-comment': mode === 'cs' && hasSentenceComments(sentence.index), selected: mode === 'cs' && activeSentence === sentence.index }"
+                      :role="(mode === 'cs' && hasSentenceComments(sentence.index)) ? 'button' : undefined"
+                      :tabindex="(mode === 'cs' && hasSentenceComments(sentence.index)) ? 0 : undefined"
+                      @click="(mode === 'cs' && hasSentenceComments(sentence.index)) ? toggleSentence(sentence.index) : undefined"
+                      @keydown.enter.prevent="(mode === 'cs' && hasSentenceComments(sentence.index)) ? toggleSentence(sentence.index) : undefined"
+                      @keydown.space.prevent="(mode === 'cs' && hasSentenceComments(sentence.index)) ? toggleSentence(sentence.index) : undefined">
                       {{ sentence.text }}<sup
                         v-if="mode === 'cs' && hasSentenceComments(sentence.index)"
                         class="annotation-marker">{{ commentsForSentence(sentence.index).length }}</sup>
                     </span>
 
-                    <!-- The original system embeds comments as ordinary text, not cards. -->
+                    <!-- Sentence-End: 评论直接嵌入句末，纯文本展示，不可点击 -->
                     <span
                       v-if="mode === 'se' && showInlineComments && topComment(sentence.index)"
-                      class="inline-comment embedded-comment-neutral"
-                      role="button"
-                      tabindex="0"
-                      :aria-label="`查看评论：${topComment(sentence.index).text}`"
-                      @click.stop="toggleSentence(sentence.index)"
-                      @keydown.enter.prevent="toggleSentence(sentence.index)"
-                      @keydown.space.prevent="toggleSentence(sentence.index)">
+                      class="inline-comment embedded-comment-neutral">
                       【{{ topComment(sentence.index).text }}】
                     </span>
                   </span>
 
-                  <!-- Between-Line comments stay in normal flow, so the following article text is pushed below them. -->
+                  <!-- Between-Line: 评论以块形式穿插在行之间，纯文本展示，不可点击 -->
                   <div
                     v-if="mode === 'be' && showInlineComments && topComment(sentence.index)"
                     class="absolute-comment embedded-comment-neutral"
-                    role="button"
-                    tabindex="0"
-                    :title="topComment(sentence.index).text"
-                    :aria-label="`查看评论：${topComment(sentence.index).text}`"
-                    @click.stop="toggleSentence(sentence.index)"
-                    @keydown.enter.prevent="toggleSentence(sentence.index)"
-                    @keydown.space.prevent="toggleSentence(sentence.index)">
+                    :title="topComment(sentence.index).text">
                     {{ topComment(sentence.index).text }}
                   </div>
                 </template>
@@ -209,7 +197,7 @@
     </div>
 
     <div
-      v-if="!isBaselineLayout"
+      v-if="mode === 'cs'"
       class="connection-container"
       ref="connectionContainer"
       aria-hidden="true">
@@ -269,7 +257,8 @@ export default defineComponent({
       return this.mode === "baseline";
     },
     hasAnnotationPanel() {
-      return !this.isBaselineLayout && this.activeSentence !== null && this.commentsForSentence(this.activeSentence).length > 0;
+      // 只有 Click-to-Show (CS) 模式才显示点击弹出的侧边栏
+      return this.mode === "cs" && this.activeSentence !== null && this.commentsForSentence(this.activeSentence).length > 0;
     },
     hasMeta() {
       return Boolean(this.article.user_nickname || this.article.created_time || this.article.updated_time);
@@ -507,7 +496,7 @@ export default defineComponent({
   display: inline;
   font-size: 0.85em;
   margin-left: 0.5em;
-  cursor: pointer;
+  cursor: default;
 }
 .inline-comment.embedded-comment-neutral {
   color: #4f6f82;
@@ -521,8 +510,8 @@ export default defineComponent({
   color: #555;
   background: none;
   padding: 0;
-  pointer-events: all;
-  cursor: pointer;
+  pointer-events: none;
+  cursor: default;
   line-height: 1.5;
   white-space: nowrap;
   overflow: hidden;
