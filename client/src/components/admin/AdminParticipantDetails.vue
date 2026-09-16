@@ -60,7 +60,32 @@
             <div><dt>评论卡片点击</dt><dd>{{ detail.comment_click_count ?? 0 }} 次</dd></div>
             <div><dt>侧边栏打开 / 关闭</dt><dd>{{ detail.comment_open_count ?? 0 }} / {{ detail.comment_close_count ?? 0 }} 次</dd></div>
             <div><dt>段落评论操作</dt><dd>{{ detail.paragraph_toggle_count ?? 0 }}</dd></div>
-            <div class="admin-participant-workload-meta"><dt>NASA-TLX / 主观评价</dt><dd>{{ workloadSummary(detail.workload) }}</dd><small v-if="detail.workload">Physical {{ detail.workload.physical_demand ?? "—" }} · Temporal {{ detail.workload.temporal_demand ?? "—" }} · Performance {{ detail.workload.performance ?? "—" }} · RC {{ detail.workload.reading_continuity ?? "—" }} · CA {{ detail.workload.comment_accessibility ?? "—" }}</small></div>
+            <div class="admin-participant-workload-meta">
+              <dt>NASA-TLX / 主观评价</dt>
+              <dd v-if="detail.workload" class="workload-visual">
+                <div class="workload-group">
+                  <div class="workload-group-title">NASA-TLX 负荷（1–7，越高负荷越大）</div>
+                  <div class="workload-bars">
+                    <div v-for="item in nasaTlxBars(detail.workload)" :key="item.key" class="workload-bar-item">
+                      <span class="workload-label">{{ item.label }}</span>
+                      <div class="workload-bar-track"><div class="workload-bar-fill workload-demand" :style="{ width: item.percent + '%' }"></div></div>
+                      <span class="workload-value">{{ item.value }}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="workload-group">
+                  <div class="workload-group-title">主观评价（1–7，越高体验越好）</div>
+                  <div class="workload-bars">
+                    <div v-for="item in subjectiveBars(detail.workload)" :key="item.key" class="workload-bar-item">
+                      <span class="workload-label">{{ item.label }}</span>
+                      <div class="workload-bar-track"><div class="workload-bar-fill workload-positive" :style="{ width: item.percent + '%' }"></div></div>
+                      <span class="workload-value">{{ item.value }}</span>
+                    </div>
+                  </div>
+                </div>
+              </dd>
+              <dd v-else>—</dd>
+            </div>
           </dl>
 
           <details class="admin-participant-raw-section" open>
@@ -173,4 +198,46 @@ function workloadSummary(workload) {
   if (!workload) return "—";
   return `MD ${workload.mental_demand ?? "—"} · Effort ${workload.effort ?? "—"} · Frustration ${workload.frustration ?? "—"}`;
 }
+function nasaTlxBars(workload) {
+  const items = [
+    { key: "mental", label: "脑力需求", value: workload.mental_demand },
+    { key: "physical", label: "体力需求", value: workload.physical_demand },
+    { key: "temporal", label: "时间压力", value: workload.temporal_demand },
+    { key: "performance", label: "任务表现", value: workload.performance },
+    { key: "effort", label: "努力程度", value: workload.effort },
+    { key: "frustration", label: "挫败感", value: workload.frustration }
+  ];
+  return items.map(item => ({
+    ...item,
+    value: item.value ?? "—",
+    percent: item.value != null ? Math.min(100, Math.max(0, (Number(item.value) / 7) * 100)) : 0
+  }));
+}
+function subjectiveBars(workload) {
+  const items = [
+    { key: "rc", label: "阅读连续性", value: workload.reading_continuity },
+    { key: "ca", label: "评论可及性", value: workload.comment_accessibility }
+  ];
+  return items.map(item => ({
+    ...item,
+    value: item.value ?? "—",
+    percent: item.value != null ? Math.min(100, Math.max(0, (Number(item.value) / 7) * 100)) : 0
+  }));
+}
 </script>
+
+<style scoped>
+.workload-visual { display: flex; flex-direction: column; gap: 12px; }
+.workload-group-title { font-size: 11px; font-weight: 700; color: #6b7f8f; margin-bottom: 6px; letter-spacing: .02em; }
+.workload-bars { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; }
+.workload-bar-item { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+.workload-label { flex-shrink: 0; width: 56px; color: #4a6274; font-size: 11px; white-space: nowrap; }
+.workload-bar-track { flex: 1; height: 8px; background: #e8eef0; border-radius: 4px; overflow: hidden; min-width: 40px; }
+.workload-bar-fill { height: 100%; border-radius: 4px; transition: width .3s ease; }
+.workload-bar-fill.workload-demand { background: linear-gradient(90deg, #f0a868, #d97742); }
+.workload-bar-fill.workload-positive { background: linear-gradient(90deg, #5fb8a8, #2b7a78); }
+.workload-value { flex-shrink: 0; width: 20px; text-align: right; font-weight: 700; color: #2c4a5e; font-size: 12px; }
+.admin-participant-workload-meta { grid-column: 1 / -1; }
+.admin-participant-workload-meta dt { margin-bottom: 8px; }
+.admin-participant-workload-meta dd { margin: 0; }
+</style>
