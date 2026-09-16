@@ -7,10 +7,11 @@
       <label for="participant-select">参与者编号</label>
       <select id="participant-select" v-model="selected" :disabled="loading">
         <option value="" disabled>请选择</option>
-        <option v-for="item in participants" :key="item.participant_id" :value="item.participant_id" :disabled="!item.available">
+        <option v-for="item in selectableParticipants" :key="item.participant_id" :value="item.participant_id" :disabled="!item.available">
           {{ item.participant_id }}{{ item.resumable ? "（继续实验）" : item.available ? "" : "（使用中）" }}
         </option>
       </select>
+      <p v-if="completedCount > 0" class="completed-notice">已有 {{ completedCount }} 名参与者完成实验，不在列表中显示。</p>
       <p v-if="error" class="error" role="alert">{{ error }}</p>
       <button type="button" :disabled="!selected || loading" @click="begin">{{ loading ? "正在进入…" : selectedItem?.resumable ? "继续实验" : "进入实验" }}</button>
       <p class="notice">请勿与他人共用编号。实验中断后，请使用同一浏览器继续。</p>
@@ -40,6 +41,9 @@ const loading = ref(false);
 const error = ref("");
 const participants = ref(PARTICIPANT_IDS.map(participant_id => ({ participant_id, available: true })));
 const selectedItem = computed(() => participants.value.find(item => item.participant_id === selected.value));
+// 过滤掉已完成实验的参与者，不在下拉框显示
+const selectableParticipants = computed(() => participants.value.filter(item => !item.completed));
+const completedCount = computed(() => participants.value.filter(item => item.completed).length);
 
 async function loadParticipants() {
   try {
@@ -95,6 +99,7 @@ button { margin-top: 18px; border: 0; color: white; background: #236b78; font-we
 button:disabled { opacity: .55; cursor: not-allowed; }
 .error { padding: 10px 12px; color: #8b1e2d; background: #fff0f1; border-radius: 8px; }
 .notice { margin: 18px 0 0; font-size: 13px; }
+.completed-notice { margin: 8px 0 0; color: #6b7f8f; font-size: 12px; }
 .divider { margin: 22px 0 18px; border-top: 1px dashed #d0dde5; }
 .reset-section { text-align: center; }
 .reset-hint { margin: 0 0 12px; color: #6b7f8f; font-size: 13px; line-height: 1.6; }

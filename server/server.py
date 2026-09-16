@@ -62,12 +62,20 @@ class ParticipantsHandler(JsonHandler):
             row["participant_id"]: row["client_instance_id"]
             for row in active_sessions
         }
+        # 已完成实验的参与者不可再选
+        completed_participants = {
+            row["participant_id"]
+            for row in self.db._many(
+                "SELECT DISTINCT participant_id FROM sessions WHERE status = 'completed'"
+            )
+        }
         self.respond({
             "participants": [
                 {
                     "participant_id": pid,
-                    "available": pid not in active_by_participant or active_by_participant[pid] == client_instance_id,
+                    "available": pid not in completed_participants and (pid not in active_by_participant or active_by_participant[pid] == client_instance_id),
                     "resumable": pid in active_by_participant and active_by_participant[pid] == client_instance_id,
+                    "completed": pid in completed_participants,
                 }
                 for pid in PARTICIPANTS
             ]
