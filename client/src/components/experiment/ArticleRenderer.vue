@@ -469,12 +469,22 @@ export default defineComponent({
 .main-content.has-global-comments.has-annotation-panel { grid-template-columns: 220px minmax(0, 1fr); grid-template-areas: "global article"; }
 .panel { box-sizing: border-box; padding: 14px; height: fit-content; border-radius: 8px; background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,.1); }
 .global-comments-panel { grid-area: global; position: sticky; top: 120px; max-height: calc(100vh - 140px); overflow-y: auto; }
-.article-panel { grid-area: article; position: sticky; top: 120px; max-height: calc(100vh - 140px); overflow-y: auto; }
+.article-panel {
+  grid-area: article;
+  position: sticky;
+  top: 120px;
+  max-height: calc(100vh - 140px);
+  overflow-y: auto;
+  /* 文章内容最大宽度并居中，右侧自然留出空白放置侧边栏 */
+  max-width: 920px;
+  margin: 0 auto;
+  width: 100%;
+}
 .baseline-article-panel { position: static; max-height: none; overflow: visible; }
-/* 侧边栏固定定位，浮动在视口右侧空白区域，不影响文章宽度 */
+/* 侧边栏固定定位，浮动在视口右侧空白区域，不遮挡文章内容 */
 .annotation-panel {
   position: fixed;
-  right: 20px;
+  right: 24px;
   top: 120px;
   width: 300px;
   max-height: calc(100vh - 180px);
@@ -553,23 +563,37 @@ export default defineComponent({
 .baseline-empty-comments { padding: 24px 0 8px; color: #8a8f98; text-align: center; }
 .connection-container { position: absolute; top: 0; left: 0; z-index: 10; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
 .connection-line { position: absolute; height: 2px; background: transparent; filter: drop-shadow(0 0 2px rgba(255,87,34,.5)); }
-@media (max-width: 1400px) {
-  /* 中等屏幕：侧边栏宽度略减，仍浮动在右侧 */
-  .annotation-panel { width: 260px; right: 12px; }
+/* 宽屏：文章 920px 居中，侧边栏 300px 浮动在右侧空白 */
+@media (min-width: 1500px) {
+  .article-panel { max-width: 920px; }
+  .annotation-panel { width: 300px; right: 24px; }
 }
-@media (max-width: 1180px) {
-  .main-content.has-global-comments { grid-template-columns: 200px minmax(0, 1fr); }
+/* 中宽屏：文章 820px，侧边栏 280px */
+@media (max-width: 1499px) and (min-width: 1300px) {
+  .article-panel { max-width: 820px; }
+  .annotation-panel { width: 280px; right: 20px; }
+}
+/* 中等屏幕：文章 720px，侧边栏 260px */
+@media (max-width: 1299px) and (min-width: 1100px) {
+  .article-panel { max-width: 720px; }
+  .annotation-panel { width: 260px; right: 16px; }
+}
+/* 较窄屏幕：全局评论面板隐藏，文章 680px，侧边栏 240px */
+@media (max-width: 1099px) and (min-width: 960px) {
+  .main-content.has-global-comments { grid-template-columns: minmax(0, 1fr); grid-template-areas: "article"; }
   .global-comments-panel { display: none; }
-  .annotation-panel { width: 240px; right: 8px; }
+  .article-panel { max-width: 680px; }
+  .annotation-panel { width: 240px; right: 12px; }
 }
-@media (max-width: 900px) {
-  /* 小屏幕：侧边栏回退到正常流，堆叠在文章下方，避免覆盖 */
+/* 小屏幕：侧边栏回退到正常流，堆叠在文章下方，避免覆盖 */
+@media (max-width: 959px) {
   .main-content, .main-content.has-global-comments, .main-content.has-annotation-panel, .main-content.has-global-comments.has-annotation-panel {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas: "article" "global" "annotation";
   }
   .global-comments-panel, .article-panel { position: static; max-height: none; }
   .global-comments-panel { display: block; }
+  .article-panel { max-width: 100%; }
   .annotation-panel {
     position: static !important;
     width: 100%;
