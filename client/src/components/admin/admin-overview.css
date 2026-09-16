@@ -133,7 +133,7 @@
   top: 0;
   right: 0;
   bottom: 0;
-  width: min(720px, 92vw);
+  width: min(1000px, 95vw);
   background: #f4f7f9;
   z-index: 950;
   display: flex;
