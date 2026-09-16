@@ -2,8 +2,8 @@
   <main class="admin-dashboard admin-overview-page">
     <header class="admin-dashboard-header">
       <div>
-        <div class="admin-kicker">Experiment overview</div>
-        <h1>CommentScope 实验总览</h1>
+        <div class="admin-kicker">Experiment monitoring</div>
+        <h1>CommentScope 实验监控仪表盘</h1>
         <p>登录身份：{{ username }} · {{ lastUpdatedText }}</p>
       </div>
       <div class="admin-header-actions">
@@ -27,6 +27,48 @@
     <div v-if="error" class="admin-error" role="alert">{{ error }}</div>
     <div v-if="loading && !summary" class="admin-loading">正在加载实验总览…</div>
     <template v-else>
+      <!-- 顶部全局概览卡片 -->
+      <section class="admin-section admin-global-cards" aria-label="全局概览">
+        <article class="admin-panel admin-global-card">
+          <span class="admin-stat-label">参与者完成率</span>
+          <div class="admin-global-card-stats">
+            <span class="admin-global-stat"><strong class="text-complete">{{ overview.participants_completed || 0 }}</strong>已完成</span>
+            <span class="admin-global-stat"><strong class="text-active">{{ participantsActive }}</strong>进行中</span>
+            <span class="admin-global-stat"><strong class="text-muted">{{ participantsNotStarted }}</strong>未开始</span>
+          </div>
+          <div class="admin-progress-bar"><div class="admin-progress-bar-fill" :style="{ width: participantProgressPercent + '%' }"></div></div>
+          <span class="admin-progress-bar-text">{{ overview.participants_started || 0 }} / {{ overview.expected_participants || 24 }} 已开始</span>
+        </article>
+
+        <article class="admin-panel admin-global-card">
+          <span class="admin-stat-label">文章区块完成率</span>
+          <strong class="admin-global-card-value">{{ overview.article_sessions_completed || 0 }}<small> / {{ overview.article_sessions_expected || 96 }}</small></strong>
+          <div class="admin-progress-bar"><div class="admin-progress-bar-fill" :style="{ width: articleProgressPercent + '%' }"></div></div>
+          <span class="admin-progress-bar-text">{{ articleProgressPercent }}% 完成</span>
+        </article>
+
+        <article class="admin-panel admin-global-card">
+          <span class="admin-stat-label">答题完成率</span>
+          <strong class="admin-global-card-value">{{ overview.responses?.total || 0 }}<small> / 960</small></strong>
+          <div class="admin-progress-bar"><div class="admin-progress-bar-fill" :style="{ width: responseProgressPercent + '%' }"></div></div>
+          <span class="admin-progress-bar-text">{{ responseProgressPercent }}% 完成</span>
+        </article>
+
+        <article class="admin-panel admin-global-card">
+          <span class="admin-stat-label">偏好与访谈</span>
+          <div class="admin-global-card-stats">
+            <span class="admin-global-stat"><strong class="text-complete">{{ overview.preferences || 0 }}</strong>偏好 / {{ overview.preferences_expected || 24 }}</span>
+            <span class="admin-global-stat"><strong class="text-complete">{{ overview.interviews || 0 }}</strong>访谈 / {{ overview.interviews_expected || 24 }}</span>
+          </div>
+          <div class="admin-progress-bar"><div class="admin-progress-bar-fill" :style="{ width: preferenceProgressPercent + '%' }"></div></div>
+          <span class="admin-progress-bar-text">偏好理由 {{ overview.preference_reason_submitted || 0 }} / {{ overview.preference_reasons_expected || 24 }}</span>
+        </article>
+      </section>
+
+      <!-- 参与者状态热力图 -->
+      <AdminParticipantHeatmap :rows="participantOverview" @view-participant="openParticipantDrawer" />
+
+      <!-- 筛选器 -->
       <section class="admin-section admin-panel admin-filter-panel" aria-label="总览筛选">
         <div class="admin-filter-heading">
           <h2>筛选数据</h2>
@@ -54,32 +96,6 @@
           </select>
         </label>
         <label class="admin-filter">
-          文章顺序（按参与者分组）
-          <select v-model="filters.article_sequence" @change="handleSequenceFilterChange">
-            <option value="">全部顺序</option>
-            <option v-for="sequence in articleSequenceOptions" :key="sequence.value" :value="sequence.value">{{ sequence.label }}</option>
-          </select>
-        </label>
-        <label class="admin-filter">
-          文章位置
-          <select v-model="filters.article_order">
-            <option value="">全部位置</option>
-            <option v-for="order in articlePositionOptions" :key="order" :value="String(order)">{{ String(order).padStart(2, "0") }}</option>
-          </select>
-        </label>
-        <label class="admin-filter">
-          查看指标
-          <select v-model="filters.dataSection">
-            <option value="progress">实验进度</option>
-            <option value="core">核心任务指标</option>
-            <option value="reading">阅读与滚动</option>
-            <option value="interaction">评论交互</option>
-            <option value="subjective">主观评价</option>
-            <option value="preference">偏好结果</option>
-            <option value="interview">访谈进度</option>
-          </select>
-        </label>
-        <label class="admin-filter">
           完成状态
           <select v-model="filters.status">
             <option value="">全部状态</option>
@@ -89,86 +105,137 @@
         </label>
         <div class="admin-filter-actions">
           <button class="admin-secondary-button" type="button" :disabled="loading" @click="resetFilters">清除筛选</button>
-          <span class="admin-filter-status">{{ filterDescription }}</span><a v-if="filters.participant_id" class="admin-secondary-button admin-anchor-button" href="#participant-details">查看该参与者完整数据</a>
+          <span class="admin-filter-status">{{ filterDescription }}</span>
         </div>
+        <button class="admin-advanced-toggle" type="button" @click="showAdvancedFilters = !showAdvancedFilters">
+          {{ showAdvancedFilters ? "收起高级筛选 ▲" : "更多筛选 ▼" }}
+        </button>
+        <div v-if="showAdvancedFilters" class="admin-advanced-filters">
+          <label class="admin-filter">
+            文章顺序（按参与者分组）
+            <select v-model="filters.article_sequence" @change="handleSequenceFilterChange">
+              <option value="">全部顺序</option>
+              <option v-for="sequence in articleSequenceOptions" :key="sequence.value" :value="sequence.value">{{ sequence.label }}</option>
+            </select>
+          </label>
+          <label class="admin-filter">
+            文章位置
+            <select v-model="filters.article_order">
+              <option value="">全部位置</option>
+              <option v-for="order in articlePositionOptions" :key="order" :value="String(order)">{{ String(order).padStart(2, "0") }}</option>
+            </select>
+          </label>
+        </div>
+        <a v-if="filters.participant_id" class="admin-secondary-button admin-anchor-button" href="#" @click.prevent="openParticipantDrawer(filters.participant_id)">查看该参与者完整数据</a>
       </section>
 
-      <AdminParticipantOverviewTable
-        v-if="showSection('progress')"
-        :rows="participantOverview"
-        @view-participant="selectParticipant"
-      />
+      <!-- 数据区块标签页 -->
+      <div class="admin-tabs" role="tablist">
+        <button
+          v-for="tab in tabs"
+          :key="tab.id"
+          type="button"
+          role="tab"
+          class="admin-tab"
+          :class="{ active: activeTab === tab.id }"
+          @click="activeTab = tab.id"
+        >{{ tab.label }}</button>
+      </div>
 
-      <AdminParticipantDetails
-        v-if="filters.participant_id"
-        :participant-id="filters.participant_id"
-        :details="participantDetails"
-        :participant-tasks="participantTasks"
-      />
+      <!-- 进度总览标签页 -->
+      <template v-if="activeTab === 'progress'">
+        <AdminParticipantOverviewTable
+          :rows="participantOverview"
+          @view-participant="openParticipantDrawer"
+        />
 
-      <section v-if="showSection('progress')" class="admin-section">
-        <div class="admin-section-heading">
-          <div>
-            <h2>实验进度</h2>
-            <p class="admin-section-description">当前筛选范围内的完成情况；偏好、偏好理由和访谈都是参与者级任务，目标人数为 24。</p>
+        <section class="admin-section">
+          <div class="admin-section-heading">
+            <div>
+              <h2>实验进度</h2>
+              <p class="admin-section-description">当前筛选范围内的完成情况；偏好、偏好理由和访谈都是参与者级任务，目标人数为 24。</p>
+            </div>
+            <span class="admin-status-pill" :class="progressStatus.className">{{ progressStatus.label }}</span>
           </div>
-          <span class="admin-status-pill" :class="progressStatus.className">{{ progressStatus.label }}</span>
-        </div>
-        <div class="admin-overview-grid admin-overview-grid-expanded">
-          <article v-for="card in overviewCards" :key="card.label" class="admin-stat-card">
-            <span class="admin-stat-label">{{ card.label }}</span>
-            <strong class="admin-stat-value">{{ card.value }}</strong>
-            <span v-if="card.detail" class="admin-stat-detail">{{ card.detail }}</span>
+          <div class="admin-overview-grid admin-overview-grid-expanded">
+            <article v-for="card in overviewCards" :key="card.label" class="admin-stat-card">
+              <span class="admin-stat-label">{{ card.label }}</span>
+              <strong class="admin-stat-value">{{ card.value }}</strong>
+              <span v-if="card.detail" class="admin-stat-detail">{{ card.detail }}</span>
+            </article>
+          </div>
+        </section>
+
+        <section class="admin-section admin-overview-columns">
+          <article class="admin-panel admin-overview-callout">
+            <div class="admin-kicker">Task progress</div>
+            <h2>逐题回答</h2>
+            <div class="admin-progress-list">
+              <div v-for="item in responseProgress" :key="item.label" class="admin-progress-row">
+                <span>{{ item.label }}</span><strong>{{ item.value }}</strong>
+              </div>
+            </div>
           </article>
-        </div>
-      </section>
-
-      <section v-if="showSection('progress')" class="admin-section admin-overview-columns">
-        <article class="admin-panel admin-overview-callout">
-          <div class="admin-kicker">Task progress</div>
-          <h2>逐题回答</h2>
-          <div class="admin-progress-list">
-            <div v-for="item in responseProgress" :key="item.label" class="admin-progress-row">
-              <span>{{ item.label }}</span><strong>{{ item.value }}</strong>
+          <article class="admin-panel admin-overview-callout">
+            <div class="admin-kicker">Participant-level tasks</div>
+            <h2>偏好与访谈</h2>
+            <div class="admin-progress-list">
+              <div v-for="item in participantTaskProgress" :key="item.label" class="admin-progress-row">
+                <span>{{ item.label }}</span><strong>{{ item.value }}</strong>
+              </div>
             </div>
-          </div>
-        </article>
-        <article class="admin-panel admin-overview-callout">
-          <div class="admin-kicker">Participant-level tasks</div>
-          <h2>偏好与访谈</h2>
-          <div class="admin-progress-list">
-            <div v-for="item in participantTaskProgress" :key="item.label" class="admin-progress-row">
-              <span>{{ item.label }}</span><strong>{{ item.value }}</strong>
-            </div>
-          </div>
-        </article>
-      </section>
+          </article>
+        </section>
 
-      <section v-if="showSection('core')" class="admin-section">
+        <section class="admin-section admin-overview-columns">
+          <article class="admin-panel admin-overview-callout">
+            <div class="admin-kicker">Interview status</div>
+            <h2>半结构化访谈</h2>
+            <p>访谈为每位参与者一次，不按文章区块重复计算。</p>
+            <strong class="admin-large-progress">{{ overview.interviews || 0 }} / {{ overview.interviews_expected || 24 }}</strong>
+          </article>
+          <article class="admin-panel admin-overview-callout">
+            <div class="admin-kicker">Scope</div>
+            <h2>当前统计范围</h2>
+            <ul class="admin-overview-list">
+              <li>已开始参与者：{{ overview.participants_started || 0 }} / {{ overview.expected_participants || 24 }}</li>
+              <li>已完成文章区块：{{ overview.article_sessions_completed || 0 }} / {{ overview.article_sessions_expected || 96 }}</li>
+              <li>默认排除已重置会话</li>
+            </ul>
+          </article>
+        </section>
+      </template>
+
+      <!-- 核心指标标签页 -->
+      <section v-if="activeTab === 'core'" class="admin-section">
         <h2>核心任务指标</h2>
         <p class="admin-section-description">按界面条件显示 CTIA、CTIRT、CRA、ACA、CLA 和 CLT 的 n、均值、中位数与标准差。</p>
         <AdminMetricSummaryTable :groups="metricGroups.core" :metrics="metrics" :conditions="visibleConditions" />
       </section>
 
-      <section v-if="showSection('reading')" class="admin-section">
+      <!-- 阅读行为标签页 -->
+      <section v-if="activeTab === 'reading'" class="admin-section">
         <h2>阅读与滚动</h2>
         <p class="admin-section-description">用于查看阅读耗时、滚动距离和页面导航行为。</p>
         <AdminMetricSummaryTable :groups="metricGroups.reading" :metrics="metrics" :conditions="visibleConditions" />
       </section>
 
-      <section v-if="showSection('interaction')" class="admin-section">
+      <!-- 评论交互标签页 -->
+      <section v-if="activeTab === 'interaction'" class="admin-section">
         <h2>评论交互</h2>
         <p class="admin-section-description">保留不同界面下的评论点击、打开、关闭和段落评论操作统计。</p>
         <AdminMetricSummaryTable :groups="metricGroups.interaction" :metrics="metrics" :conditions="visibleConditions" />
       </section>
 
-      <section v-if="showSection('subjective')" class="admin-section">
+      <!-- 主观评价标签页 -->
+      <section v-if="activeTab === 'subjective'" class="admin-section">
         <h2>主观评价</h2>
         <p class="admin-section-description">NASA-TLX 六个维度、Reading Continuity 和 Comment Accessibility 的描述性统计。</p>
         <AdminMetricSummaryTable :groups="metricGroups.subjective" :metrics="metrics" :conditions="visibleConditions" />
       </section>
 
-      <section v-if="showSection('preference')" class="admin-section">
+      <!-- 偏好结果标签页 -->
+      <section v-if="activeTab === 'preference'" class="admin-section">
         <h2>偏好结果</h2>
         <p class="admin-section-description">偏好排序和首选界面属于参与者级数据；筛选文章或顺序时，统计的是筛选范围内相关参与者的结果。</p>
         <div class="admin-simple-table-wrap">
@@ -189,45 +256,7 @@
         </div>
       </section>
 
-      <section v-if="showSection('interview')" class="admin-section admin-overview-columns">
-        <article class="admin-panel admin-overview-callout">
-          <div class="admin-kicker">Interview status</div>
-          <h2>半结构化访谈</h2>
-          <p>访谈为每位参与者一次，不按文章区块重复计算。</p>
-          <strong class="admin-large-progress">{{ overview.interviews || 0 }} / {{ overview.interviews_expected || 24 }}</strong>
-        </article>
-        <article class="admin-panel admin-overview-callout">
-          <div class="admin-kicker">Scope</div>
-          <h2>当前统计范围</h2>
-          <ul class="admin-overview-list">
-            <li>已开始参与者：{{ overview.participants_started || 0 }} / {{ overview.expected_participants || 24 }}</li>
-            <li>已完成文章区块：{{ overview.article_sessions_completed || 0 }} / {{ overview.article_sessions_expected || 96 }}</li>
-            <li>默认排除已重置会话</li>
-          </ul>
-        </article>
-      </section>
-
-      <section v-if="filters.dataSection === 'all'" class="admin-section">
-        <h2>四种界面快速比较</h2>
-        <p class="admin-section-description">下面是核心指标的平均值；详细 n、均值、中位数和标准差见上方各数据表。</p>
-        <div class="admin-simple-table-wrap">
-          <table class="admin-simple-table">
-            <thead><tr><th>界面</th><th>CTIA<br><span>正文—评论关联</span></th><th>CTIRT<br><span>关联时间</span></th><th>CRA<br><span>评论记忆</span></th><th>ACA<br><span>正文理解</span></th><th>RC<br><span>阅读连续性</span></th><th>CA<br><span>评论可访问性</span></th></tr></thead>
-            <tbody>
-              <tr v-for="condition in visibleConditions" :key="condition">
-                <th scope="row"><span class="condition-badge" :class="`condition-${condition.toLowerCase()}`">{{ condition }}</span></th>
-                <td>{{ metricValue("CTIA", condition, formatAccuracy) }}</td>
-                <td>{{ metricValue("CTIRT", condition, formatSeconds, " 秒") }}</td>
-                <td>{{ metricValue("CRA", condition, formatAccuracy) }}</td>
-                <td>{{ metricValue("ACA", condition, formatAccuracy) }}</td>
-                <td>{{ metricValue("RC", condition, formatRating) }}</td>
-                <td>{{ metricValue("CA", condition, formatRating) }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
+      <!-- 底部引导卡片和数据范围 -->
       <section class="admin-section admin-overview-columns">
         <article class="admin-panel admin-overview-callout">
           <div class="admin-kicker">What to do next</div>
@@ -248,6 +277,27 @@
         </article>
       </section>
     </template>
+
+    <!-- 参与者详情右侧抽屉 -->
+    <transition name="drawer-fade">
+      <div v-if="drawerOpen" class="admin-drawer-overlay" @click.self="closeParticipantDrawer"></div>
+    </transition>
+    <transition name="drawer-slide">
+      <aside v-if="drawerOpen" class="admin-participant-drawer" aria-label="参与者详情抽屉">
+        <div class="admin-drawer-header">
+          <h2>参与者详情 · {{ drawerParticipantId }}</h2>
+          <button class="admin-drawer-close" type="button" @click="closeParticipantDrawer" aria-label="关闭">✕</button>
+        </div>
+        <div class="admin-drawer-body">
+          <AdminParticipantDetails
+            v-if="drawerParticipantId"
+            :participant-id="drawerParticipantId"
+            :details="participantDetails"
+            :participant-tasks="participantTasks"
+          />
+        </div>
+      </aside>
+    </transition>
   </main>
 </template>
 
@@ -257,8 +307,10 @@ import adminApi from "../../admin/adminApi";
 import AdminMetricSummaryTable from "./AdminMetricSummaryTable.vue";
 import AdminParticipantDetails from "./AdminParticipantDetails.vue";
 import AdminParticipantOverviewTable from "./AdminParticipantOverviewTable.vue";
+import AdminParticipantHeatmap from "./AdminParticipantHeatmap.vue";
 import { DEMO_OVERVIEW_SUMMARY, buildDemoOverviewSummary } from "../../admin/adminDemoData";
 import "./admin.css";
+import "./admin-overview.css";
 
 const props = defineProps({ username: { type: String, default: "admin" } });
 const emit = defineEmits(["logout"]);
@@ -276,7 +328,20 @@ const summary = ref(null);
 const showDemoData = ref(false);
 const loading = ref(false);
 const error = ref("");
-const filters = reactive({ participant_id: "", article_id: "", condition: "", article_sequence: "", article_order: "", status: "", dataSection: "progress" });
+const filters = reactive({ participant_id: "", article_id: "", condition: "", article_sequence: "", article_order: "", status: "" });
+const showAdvancedFilters = ref(false);
+const activeTab = ref("progress");
+const drawerOpen = ref(false);
+const drawerParticipantId = ref("");
+
+const tabs = [
+  { id: "progress", label: "进度总览" },
+  { id: "core", label: "核心指标" },
+  { id: "reading", label: "阅读行为" },
+  { id: "interaction", label: "评论交互" },
+  { id: "subjective", label: "主观评价" },
+  { id: "preference", label: "偏好结果" },
+];
 
 const metricGroups = {
   core: [
@@ -324,9 +389,7 @@ const participantOptions = computed(() => effectiveSummary.value?.filter_options
 const lastUpdatedText = computed(() => effectiveSummary.value?.last_updated_at ? `最近活动：${formatDate(effectiveSummary.value.last_updated_at)}` : "暂无实验数据");
 const visibleConditions = computed(() => filters.condition ? [filters.condition] : conditions);
 const apiFilters = computed(() => {
-  const next = Object.fromEntries(Object.entries(filters).filter(([key, value]) => key !== "dataSection" && value));
-  // Article sequence means all participants in that allocation group. Do not
-  // let stale participant state narrow this group-wide query.
+  const next = Object.fromEntries(Object.entries(filters).filter(([key, value]) => value));
   if (next.article_sequence) delete next.participant_id;
   return next;
 });
@@ -343,6 +406,12 @@ const filterDescription = computed(() => {
   if (filters.status) parts.push(filters.status === "completed" ? "已完成" : "进行中");
   return parts.length ? `当前：${parts.join(" / ")}` : "当前：全部未重置数据";
 });
+const participantsActive = computed(() => Number(overview.value.participants_active ?? (overview.value.participants_started || 0) - (overview.value.participants_completed || 0)));
+const participantsNotStarted = computed(() => Math.max(0, Number(overview.value.expected_participants || 24) - Number(overview.value.participants_started || 0)));
+const participantProgressPercent = computed(() => Math.round(Number(overview.value.participants_started || 0) / Number(overview.value.expected_participants || 24) * 100));
+const articleProgressPercent = computed(() => Math.round(Number(overview.value.article_sessions_completed || 0) / Number(overview.value.article_sessions_expected || 96) * 100));
+const responseProgressPercent = computed(() => Math.round(Number(overview.value.responses?.total || 0) / 960 * 100));
+const preferenceProgressPercent = computed(() => Math.round(Number(overview.value.preferences || 0) / Number(overview.value.preferences_expected || 24) * 100));
 const progressStatus = computed(() => {
   const completed = Number(overview.value.article_sessions_completed || 0);
   const expected = Number(overview.value.article_sessions_expected || 96);
@@ -372,7 +441,6 @@ const participantTaskProgress = computed(() => [
   { label: "半结构化访谈", value: `${overview.value.interviews || 0} / ${overview.value.interviews_expected || 24}` },
 ]);
 
-function showSection(section) { return filters.dataSection === "all" || filters.dataSection === section; }
 function formatAccuracy(value) { return formatNumber(value, 2); }
 function formatRating(value) { return formatNumber(value, 1); }
 function formatSeconds(value) { return formatNumber(Number(value) / 1000, 2); }
@@ -383,36 +451,26 @@ function formatDate(value) {
   if (Number.isNaN(date.getTime())) return String(value);
   return date.toLocaleString("zh-CN", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
 }
-function metricValue(name, condition, formatter, suffix = "") {
-  const item = metrics.value[name]?.[condition];
-  return item?.mean == null ? "—" : `${formatter(item.mean)}${suffix}`;
-}
-function formatMetricStat(name, value) {
-  if (value == null) return "—";
-  if (["CTIRT", "CLT", "Initial Reading Time"].includes(name)) return `${formatSeconds(value)} s`;
-  if (name === "NSD") return formatNumber(value, 3);
-  if (["CTIA", "CRA", "ACA", "CLA"].includes(name)) return formatAccuracy(value);
-  if (["RC", "CA"].includes(name)) return formatRating(value);
-  return formatNumber(value, 2);
-}
 function resetFilters() {
-  Object.assign(filters, { participant_id: "", article_id: "", condition: "", article_sequence: "", article_order: "", status: "", dataSection: "progress" });
+  Object.assign(filters, { participant_id: "", article_id: "", condition: "", article_sequence: "", article_order: "", status: "" });
 }
 
-function selectParticipant(participantId) {
+function openParticipantDrawer(participantId) {
   filters.participant_id = participantId;
   filters.article_sequence = "";
+  drawerParticipantId.value = participantId;
+  drawerOpen.value = true;
+}
+
+function closeParticipantDrawer() {
+  drawerOpen.value = false;
 }
 
 function handleParticipantFilterChange() {
-  // A participant filter is an individual scope, while article sequence is a
-  // participant-group scope. They must not remain active together.
   if (filters.participant_id) filters.article_sequence = "";
 }
 
 function handleSequenceFilterChange() {
-  // Selecting a complete sequence means "all participants assigned to this
-  // sequence", not the participant that happened to be selected previously.
   if (filters.article_sequence) filters.participant_id = "";
 }
 async function loadSummary() {
@@ -439,4 +497,3 @@ watch(apiFilters, loadSummary, { deep: true });
 watch(showDemoData, loadSummary);
 onMounted(loadSummary);
 </script>
-

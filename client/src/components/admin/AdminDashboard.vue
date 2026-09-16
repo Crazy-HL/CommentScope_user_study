@@ -1,155 +1,254 @@
 <template>
-  <main class="admin-dashboard">
-    <header class="admin-dashboard-header">
-      <div>
-        <div class="admin-kicker">Research dashboard</div>
-        <h1>CommentScope 论文分析</h1>
-        <p>登录身份：{{ username }} · {{ lastUpdatedText }}</p>
-      </div>
-      <div class="admin-header-actions">
-        <button class="admin-secondary-button" type="button" :disabled="loading" @click="loadAll">{{ loading ? "刷新中…" : "刷新数据" }}</button>
-        <button class="admin-secondary-button" type="button" @click="logout">退出登录</button>
-      </div>
-    </header>
-
-    <nav class="admin-page-nav" aria-label="管理员页面导航">
-      <a class="admin-page-nav-link" href="/admin">普通总览</a>
-      <a class="admin-page-nav-link active" href="/admin/analysis">论文分析</a>
+  <div class="admin-workspace-shell">
+    <!-- 左侧固定导航栏 -->
+    <nav class="admin-workspace-nav" aria-label="论文分析区块导航">
+      <div class="admin-workspace-nav-title">研究分析工作台</div>
+      <a
+        v-for="item in navItems"
+        :key="item.id"
+        class="admin-workspace-nav-link"
+        :class="{ active: activeSection === item.id }"
+        :href="`#${item.id}`"
+        @click.prevent="scrollToSection(item.id)"
+      >{{ item.label }}</a>
     </nav>
 
-    <div class="admin-analysis-toolbar">
-      <label class="admin-demo-toggle"><input v-model="showDemoData" type="checkbox" /> 使用模拟数据预览论文图表</label>
-      <span v-if="showDemoData" class="admin-demo-badge">当前为模拟数据，仅用于视觉预览，不会写入 SQLite</span>
-    </div>
-
-    <div v-if="error" class="admin-error" role="alert">{{ error }}</div>
-    <div v-if="loading && !summary" class="admin-loading">正在加载管理员统计…</div>
-    <template v-else>
-      <section class="admin-section">
-        <h2>实验总览</h2>
-        <div class="admin-overview-grid">
-          <article v-for="card in overviewCards" :key="card.label" class="admin-stat-card">
-            <span class="admin-stat-label">{{ card.label }}</span>
-            <strong class="admin-stat-value">{{ card.value }}</strong>
-          </article>
+    <!-- 主内容区 -->
+    <main class="admin-dashboard admin-workspace-main">
+      <header class="admin-dashboard-header">
+        <div>
+          <div class="admin-kicker">Research workspace</div>
+          <h1>CommentScope 研究分析工作台</h1>
+          <p>登录身份：{{ username }} · {{ lastUpdatedText }}</p>
         </div>
-      </section>
-
-      <section class="admin-section">
-        <h2>筛选数据范围</h2>
-        <div class="admin-panel admin-filter-panel">
-          <label class="admin-filter">参与者
-            <select v-model="filters.participant_id">
-              <option value="">全部参与者</option>
-              <option v-for="participant in participantOptions" :key="participant" :value="participant">{{ participant }}</option>
-            </select>
-          </label>
-          <label class="admin-filter">文章
-            <select v-model="filters.article_id"><option value="">全部文章</option><option v-for="article in articles" :key="article" :value="article">{{ article }}</option></select>
-          </label>
-          <label class="admin-filter">条件
-            <select v-model="filters.condition"><option value="">全部条件</option><option v-for="condition in conditions" :key="condition" :value="condition">{{ condition }}</option></select>
-          </label>
-          <label class="admin-filter">文章区块状态
-            <select v-model="filters.status"><option value="">全部状态</option><option value="completed">completed</option><option value="active">active</option></select>
-          </label>
-          <div class="admin-filter-actions"><button class="admin-primary-button" type="button" @click="loadAll">应用筛选</button><button class="admin-secondary-button" type="button" @click="clearFilters">清除</button></div>
-        </div>
-      </section>
-
-      <AdminParticipantDetails
-        v-if="filters.participant_id"
-        :participant-id="filters.participant_id"
-        :details="participantDetails"
-        :participant-tasks="participantTasks"
-      />
-
-      <section class="admin-section">
-        <div class="admin-section-heading">
-          <div>
-            <h2>论文风格统计图</h2>
-            <p class="admin-section-description">整体条件比较和任务级准确率按照论文图表风格展示：保留参与者级散点、中心趋势和误差范围。</p>
+        <div class="admin-header-actions">
+          <!-- 顶部快速导出下拉 -->
+          <div class="admin-quick-export" :class="{ open: exportMenuOpen }">
+            <button class="admin-secondary-button" type="button" @click="exportMenuOpen = !exportMenuOpen">
+              导出数据 ▾
+            </button>
+            <div v-if="exportMenuOpen" class="admin-quick-export-menu">
+              <button type="button" @click="quickExport('csv', 'analysis')">导出分析 CSV</button>
+              <button type="button" @click="quickExport('json', 'analysis')">导出分析 JSON</button>
+              <button type="button" @click="quickExport('csv', 'events')">导出原始事件 CSV</button>
+              <button type="button" @click="quickExport('json', 'events')">导出原始事件 JSON</button>
+            </div>
           </div>
-          <span v-if="showDemoData" class="admin-status-pill status-active">演示数据</span>
+          <button class="admin-secondary-button" type="button" :disabled="loading" @click="loadAll">{{ loading ? "刷新中…" : "刷新数据" }}</button>
+          <button class="admin-secondary-button" type="button" @click="logout">退出登录</button>
         </div>
-        <AdminAcademicOverallChart :overall-time="academicChartData.overallTime" :overall-accuracy="academicChartData.overallAccuracy" />
-        <AdminAcademicTaskChart :task-accuracy="academicChartData.taskAccuracy" />
-      </section>
+      </header>
 
-      <section class="admin-section">
-        <h2>核心结果图</h2>
-        <p class="admin-section-description">CTIA/CTIRT 直接反映参与者建立正文—评论关系的准确率与反应时间；CLA/CLT 反映评论定位表现。</p>
-        <div class="admin-metric-grid"><AdminAcademicMetricChart v-for="item in coreMetrics" :key="item.name" :title="item.title" :metric="item.name" :series="academicMetricSeries(item.name)" :format="item.format" :higher-is-better="item.higherIsBetter" :unit="item.unit" :chart-type="item.chartType" :domain="item.domain" :ticks="item.ticks" /></div>
-      </section>
+      <nav class="admin-page-nav" aria-label="管理员页面导航">
+        <a class="admin-page-nav-link" href="/admin">普通总览</a>
+        <a class="admin-page-nav-link active" href="/admin/analysis">论文分析</a>
+      </nav>
 
-      <section class="admin-section">
-        <h2>任务表现图</h2>
-        <div class="admin-metric-grid"><AdminAcademicMetricChart v-for="item in taskMetrics" :key="item.name" :title="item.title" :metric="item.name" :series="academicMetricSeries(item.name)" :format="item.format" :higher-is-better="item.higherIsBetter" :unit="item.unit" :chart-type="item.chartType" :domain="item.domain" :ticks="item.ticks" /></div>
-      </section>
+      <div class="admin-analysis-toolbar">
+        <label class="admin-demo-toggle"><input v-model="showDemoData" type="checkbox" /> 使用模拟数据预览论文图表</label>
+        <span v-if="showDemoData" class="admin-demo-badge">当前为模拟数据，仅用于视觉预览，不会写入 SQLite</span>
+      </div>
 
-      <section class="admin-section">
-        <h2>阅读行为图</h2>
-        <p class="admin-section-description">阅读时间、滚动距离和滚动事件用于描述阅读过程与页面导航，不作为核心因果结论。</p>
-        <div class="admin-metric-grid"><AdminAcademicMetricChart v-for="item in readingMetrics" :key="item.name" :title="item.title" :metric="item.name" :series="academicMetricSeries(item.name)" :format="item.format" :higher-is-better="item.higherIsBetter" :unit="item.unit" :chart-type="item.chartType" :domain="item.domain" :ticks="item.ticks" /></div>
-      </section>
+      <div v-if="error" class="admin-error" role="alert">{{ error }}</div>
+      <div v-if="loading && !summary" class="admin-loading">正在加载管理员统计…</div>
+      <template v-else>
+        <!-- 实验总览 -->
+        <section id="section-overview" class="admin-section admin-workspace-section">
+          <h2>实验总览</h2>
+          <div class="admin-overview-grid">
+            <article v-for="card in overviewCards" :key="card.label" class="admin-stat-card">
+              <span class="admin-stat-label">{{ card.label }}</span>
+              <strong class="admin-stat-value">{{ card.value }}</strong>
+            </article>
+          </div>
+        </section>
 
-      <section class="admin-section">
-        <h2>评论交互图</h2>
-        <p class="admin-section-description">保留不同呈现条件下的点击、打开、关闭和段落交互语义，辅助解释评论使用行为。</p>
-        <div class="admin-metric-grid"><AdminAcademicMetricChart v-for="item in interactionMetrics" :key="item.name" :title="item.title" :metric="item.name" :series="academicMetricSeries(item.name)" :format="item.format" :higher-is-better="item.higherIsBetter" :unit="item.unit" :chart-type="item.chartType" :domain="item.domain" :ticks="item.ticks" /></div>
-      </section>
+        <!-- 筛选器（移到顶部） -->
+        <section id="section-filters" class="admin-section admin-workspace-section">
+          <h2>筛选数据范围</h2>
+          <div class="admin-panel admin-filter-panel">
+            <label class="admin-filter">参与者
+              <select v-model="filters.participant_id">
+                <option value="">全部参与者</option>
+                <option v-for="participant in participantOptions" :key="participant" :value="participant">{{ participant }}</option>
+              </select>
+            </label>
+            <label class="admin-filter">文章
+              <select v-model="filters.article_id"><option value="">全部文章</option><option v-for="article in articles" :key="article" :value="article">{{ article }}</option></select>
+            </label>
+            <label class="admin-filter">条件
+              <select v-model="filters.condition"><option value="">全部条件</option><option v-for="condition in conditions" :key="condition" :value="condition">{{ condition }}</option></select>
+            </label>
+            <label class="admin-filter">文章区块状态
+              <select v-model="filters.status"><option value="">全部状态</option><option value="completed">completed</option><option value="active">active</option></select>
+            </label>
+            <div class="admin-filter-actions"><button class="admin-primary-button" type="button" @click="loadAll">应用筛选</button><button class="admin-secondary-button" type="button" @click="clearFilters">清除</button></div>
+          </div>
+        </section>
 
-      <section class="admin-section">
-        <h2>主观评价图</h2>
-        <p class="admin-section-description">NASA-TLX 六个维度合并为 2×3 参与者散点图；Reading Continuity 与 Comment Accessibility 单独用双面板散点图展示。</p>
-        <AdminAcademicSubjectiveChart title="NASA-TLX 六维度" :metrics="subjectiveMetrics.slice(2)" :series-by-metric="subjectiveChartSeries" />
-        <AdminAcademicSubjectiveChart title="Reading Continuity & Comment Accessibility" :metrics="subjectiveMetrics.slice(0, 2)" :series-by-metric="continuityChartSeries" />
-      </section>
+        <!-- 论文风格统计图 -->
+        <section id="section-academic-overall" class="admin-section admin-workspace-section">
+          <div class="admin-collapsible-heading" @click="toggleSection('academicOverall')">
+            <div>
+              <h2>论文风格统计图</h2>
+              <p class="admin-section-description">整体条件比较和任务级准确率按照论文图表风格展示：保留参与者级散点、中心趋势和误差范围。</p>
+            </div>
+            <span class="admin-collapse-icon">{{ collapsedSections.academicOverall ? "▶" : "▼" }}</span>
+            <span v-if="showDemoData" class="admin-status-pill status-active">演示数据</span>
+          </div>
+          <div v-show="!collapsedSections.academicOverall">
+            <AdminAcademicOverallChart :overall-time="academicChartData.overallTime" :overall-accuracy="academicChartData.overallAccuracy" />
+            <AdminAcademicTaskChart :task-accuracy="academicChartData.taskAccuracy" />
+          </div>
+        </section>
 
-      <section class="admin-section">
-        <h2>偏好结果图</h2>
-        <p class="admin-section-description">平均排名和第一名比例用于展示四种界面的总体偏好；偏好理由全文仍通过数据导出查看。</p>
-        <div class="admin-metric-grid"><AdminAcademicMetricChart title="Preference Ranking · 平均排名" metric="Preference Ranking" :series="preferenceChartData.meanRank" :format="formatNumber" :higher-is-better="false" chart-type="horizontal-bar" :domain="[1, 4]" :ticks="[1, 2, 3, 4]" /><AdminAcademicMetricChart title="First-place Share · 第一名比例" metric="First-place Share" :series="preferenceChartData.firstPlaceShare" :format="formatAccuracy" :higher-is-better="true" chart-type="horizontal-bar" :domain="[0, 1]" :ticks="[0, 0.25, 0.5, 0.75, 1]" /></div>
-        <div class="admin-preference-grid"><article v-for="condition in conditions" :key="condition" class="admin-preference-card"><strong>{{ condition }}</strong><span>平均排名：{{ preferenceRank(condition) }}</span><span>第一名：{{ preference.rank_one?.[condition] || 0 }} 次</span><span>最后一名：{{ preference.rank_four?.[condition] || 0 }} 次</span></article></div>
-        <p class="admin-muted">已提交偏好：{{ preference.submitted || 0 }}</p>
-      </section>
+        <!-- 核心结果图 -->
+        <section id="section-core" class="admin-section admin-workspace-section">
+          <div class="admin-collapsible-heading" @click="toggleSection('core')">
+            <div>
+              <h2>核心结果图</h2>
+              <p class="admin-section-description">CTIA/CTIRT 直接反映参与者建立正文—评论关系的准确率与反应时间；CLA/CLT 反映评论定位表现。</p>
+            </div>
+            <span class="admin-collapse-icon">{{ collapsedSections.core ? "▶" : "▼" }}</span>
+          </div>
+          <div v-show="!collapsedSections.core">
+            <!-- 核心结果摘要卡片 -->
+            <div class="admin-core-summary-grid">
+              <article v-for="card in coreSummaryCards" :key="card.metric" class="admin-panel admin-core-summary-card">
+                <span class="admin-stat-label">{{ card.label }}</span>
+                <strong class="admin-core-summary-value">{{ card.value }}</strong>
+                <span class="admin-core-summary-n">n = {{ card.n }}</span>
+              </article>
+            </div>
+            <div class="admin-metric-grid"><AdminAcademicMetricChart v-for="item in coreMetrics" :key="item.name" :title="item.title" :metric="item.name" :series="academicMetricSeries(item.name)" :format="item.format" :higher-is-better="item.higherIsBetter" :unit="item.unit" :chart-type="item.chartType" :domain="item.domain" :ticks="item.ticks" /></div>
+          </div>
+        </section>
 
-      <section class="admin-section">
-        <h2>描述性结果分析</h2>
-        <div v-if="analysisStatements.length" class="admin-analysis-list"><article v-for="statement in analysisStatements" :key="`${statement.metric}-${statement.text}`" class="admin-analysis-item"><strong>{{ statement.metric }}</strong><p>{{ statement.text }}</p></article></div>
-        <p v-else class="admin-empty">暂无分析文字。</p>
-      </section>
+        <!-- 任务表现图 -->
+        <section id="section-task" class="admin-section admin-workspace-section">
+          <div class="admin-collapsible-heading" @click="toggleSection('task')">
+            <h2>任务表现图</h2>
+            <span class="admin-collapse-icon">{{ collapsedSections.task ? "▶" : "▼" }}</span>
+          </div>
+          <div v-show="!collapsedSections.task">
+            <div class="admin-metric-grid"><AdminAcademicMetricChart v-for="item in taskMetrics" :key="item.name" :title="item.title" :metric="item.name" :series="academicMetricSeries(item.name)" :format="item.format" :higher-is-better="item.higherIsBetter" :unit="item.unit" :chart-type="item.chartType" :domain="item.domain" :ticks="item.ticks" /></div>
+          </div>
+        </section>
 
-      <section class="admin-section">
-        <h2>数据完整性</h2>
-        <div v-if="qualityIssues.length" class="admin-quality-list"><article v-for="issue in qualityIssues" :key="`${issue.code}-${issue.message}`" :class="['admin-quality-item', issue.severity]"><p><strong>{{ issue.code }}</strong> · {{ issue.message }}（{{ issue.count }}）</p></article></div>
-        <p v-else class="admin-quality-item info"><strong>当前范围未发现数据完整性问题。</strong></p>
-      </section>
+        <!-- 阅读行为图 -->
+        <section id="section-reading" class="admin-section admin-workspace-section">
+          <div class="admin-collapsible-heading" @click="toggleSection('reading')">
+            <div>
+              <h2>阅读行为图</h2>
+              <p class="admin-section-description">阅读时间、滚动距离和滚动事件用于描述阅读过程与页面导航，不作为核心因果结论。</p>
+            </div>
+            <span class="admin-collapse-icon">{{ collapsedSections.reading ? "▶" : "▼" }}</span>
+          </div>
+          <div v-show="!collapsedSections.reading">
+            <div class="admin-metric-grid"><AdminAcademicMetricChart v-for="item in readingMetrics" :key="item.name" :title="item.title" :metric="item.name" :series="academicMetricSeries(item.name)" :format="item.format" :higher-is-better="item.higherIsBetter" :unit="item.unit" :chart-type="item.chartType" :domain="item.domain" :ticks="item.ticks" /></div>
+          </div>
+        </section>
 
-      <section class="admin-section">
-        <h2>数据操作</h2>
-        <div class="admin-panel admin-button-row">
-          <button class="admin-secondary-button" type="button" @click='download("csv", "analysis")'>导出分析 CSV</button>
-          <button class="admin-secondary-button" type="button" @click='download("json", "analysis")'>导出分析 JSON</button>
-          <button class="admin-secondary-button" type="button" @click='download("csv", "events")'>导出原始事件 CSV</button>
-          <button class="admin-secondary-button" type="button" @click='download("json", "events")'>导出原始事件 JSON</button>
-        </div>
-        <div class="admin-danger-panel" style="margin-top: 12px;"><label>重置参与者<select v-model="resetParticipantId" class="admin-reset-select"><option value="">请选择参与者</option><option v-for="participant in participantOptions" :key="participant" :value="participant">{{ participant }}</option></select></label><button class="admin-danger-button" type="button" :disabled="!resetParticipantId || resetting" @click="resetParticipant">{{ resetting ? "重置中…" : "重置参与者" }}</button></div>
-      </section>
-    </template>
-  </main>
+        <!-- 评论交互图 -->
+        <section id="section-interaction" class="admin-section admin-workspace-section">
+          <div class="admin-collapsible-heading" @click="toggleSection('interaction')">
+            <div>
+              <h2>评论交互图</h2>
+              <p class="admin-section-description">保留不同呈现条件下的点击、打开、关闭和段落交互语义，辅助解释评论使用行为。</p>
+            </div>
+            <span class="admin-collapse-icon">{{ collapsedSections.interaction ? "▶" : "▼" }}</span>
+          </div>
+          <div v-show="!collapsedSections.interaction">
+            <div class="admin-metric-grid"><AdminAcademicMetricChart v-for="item in interactionMetrics" :key="item.name" :title="item.title" :metric="item.name" :series="academicMetricSeries(item.name)" :format="item.format" :higher-is-better="item.higherIsBetter" :unit="item.unit" :chart-type="item.chartType" :domain="item.domain" :ticks="item.ticks" /></div>
+          </div>
+        </section>
+
+        <!-- 主观评价图 -->
+        <section id="section-subjective" class="admin-section admin-workspace-section">
+          <div class="admin-collapsible-heading" @click="toggleSection('subjective')">
+            <div>
+              <h2>主观评价图</h2>
+              <p class="admin-section-description">NASA-TLX 六个维度合并为 2×3 参与者散点图；Reading Continuity 与 Comment Accessibility 单独用双面板散点图展示。</p>
+            </div>
+            <span class="admin-collapse-icon">{{ collapsedSections.subjective ? "▶" : "▼" }}</span>
+          </div>
+          <div v-show="!collapsedSections.subjective">
+            <AdminAcademicSubjectiveChart title="NASA-TLX 六维度" :metrics="subjectiveMetrics.slice(2)" :series-by-metric="subjectiveChartSeries" />
+            <AdminAcademicSubjectiveChart title="Reading Continuity & Comment Accessibility" :metrics="subjectiveMetrics.slice(0, 2)" :series-by-metric="continuityChartSeries" />
+          </div>
+        </section>
+
+        <!-- 偏好结果图 -->
+        <section id="section-preference" class="admin-section admin-workspace-section">
+          <div class="admin-collapsible-heading" @click="toggleSection('preference')">
+            <div>
+              <h2>偏好结果图</h2>
+              <p class="admin-section-description">平均排名和第一名比例用于展示四种界面的总体偏好；偏好理由全文仍通过数据导出查看。</p>
+            </div>
+            <span class="admin-collapse-icon">{{ collapsedSections.preference ? "▶" : "▼" }}</span>
+          </div>
+          <div v-show="!collapsedSections.preference">
+            <div class="admin-metric-grid"><AdminAcademicMetricChart title="Preference Ranking · 平均排名" metric="Preference Ranking" :series="preferenceChartData.meanRank" :format="formatNumber" :higher-is-better="false" chart-type="horizontal-bar" :domain="[1, 4]" :ticks="[1, 2, 3, 4]" /><AdminAcademicMetricChart title="First-place Share · 第一名比例" metric="First-place Share" :series="preferenceChartData.firstPlaceShare" :format="formatAccuracy" :higher-is-better="true" chart-type="horizontal-bar" :domain="[0, 1]" :ticks="[0, 0.25, 0.5, 0.75, 1]" /></div>
+            <div class="admin-preference-grid"><article v-for="condition in conditions" :key="condition" class="admin-preference-card"><strong>{{ condition }}</strong><span>平均排名：{{ preferenceRank(condition) }}</span><span>第一名：{{ preference.rank_one?.[condition] || 0 }} 次</span><span>最后一名：{{ preference.rank_four?.[condition] || 0 }} 次</span></article></div>
+            <p class="admin-muted">已提交偏好：{{ preference.submitted || 0 }}</p>
+          </div>
+        </section>
+
+        <!-- 描述性结果分析 -->
+        <section id="section-analysis" class="admin-section admin-workspace-section">
+          <div class="admin-collapsible-heading" @click="toggleSection('analysis')">
+            <h2>描述性结果分析</h2>
+            <span class="admin-collapse-icon">{{ collapsedSections.analysis ? "▶" : "▼" }}</span>
+          </div>
+          <div v-show="!collapsedSections.analysis">
+            <div v-if="analysisStatements.length" class="admin-analysis-list"><article v-for="statement in analysisStatements" :key="`${statement.metric}-${statement.text}`" class="admin-analysis-item"><strong>{{ statement.metric }}</strong><p>{{ statement.text }}</p></article></div>
+            <p v-else class="admin-empty">暂无分析文字。</p>
+          </div>
+        </section>
+
+        <!-- 数据完整性 -->
+        <section id="section-quality" class="admin-section admin-workspace-section">
+          <div class="admin-collapsible-heading" @click="toggleSection('quality')">
+            <h2>数据完整性</h2>
+            <span class="admin-collapse-icon">{{ collapsedSections.quality ? "▶" : "▼" }}</span>
+          </div>
+          <div v-show="!collapsedSections.quality">
+            <div v-if="qualityIssues.length" class="admin-quality-list"><article v-for="issue in qualityIssues" :key="`${issue.code}-${issue.message}`" :class="['admin-quality-item', issue.severity]"><p><strong>{{ issue.code }}</strong> · {{ issue.message }}（{{ issue.count }}）</p></article></div>
+            <p v-else class="admin-quality-item info"><strong>当前范围未发现数据完整性问题。</strong></p>
+          </div>
+        </section>
+
+        <!-- 数据操作 -->
+        <section id="section-operations" class="admin-section admin-workspace-section">
+          <div class="admin-collapsible-heading" @click="toggleSection('operations')">
+            <h2>数据操作</h2>
+            <span class="admin-collapse-icon">{{ collapsedSections.operations ? "▶" : "▼" }}</span>
+          </div>
+          <div v-show="!collapsedSections.operations">
+            <div class="admin-panel admin-button-row">
+              <button class="admin-secondary-button" type="button" @click='download("csv", "analysis")'>导出分析 CSV</button>
+              <button class="admin-secondary-button" type="button" @click='download("json", "analysis")'>导出分析 JSON</button>
+              <button class="admin-secondary-button" type="button" @click='download("csv", "events")'>导出原始事件 CSV</button>
+              <button class="admin-secondary-button" type="button" @click='download("json", "events")'>导出原始事件 JSON</button>
+            </div>
+            <div class="admin-danger-panel" style="margin-top: 12px;"><label>重置参与者<select v-model="resetParticipantId" class="admin-reset-select"><option value="">请选择参与者</option><option v-for="participant in participantOptions" :key="participant" :value="participant">{{ participant }}</option></select></label><button class="admin-danger-button" type="button" :disabled="!resetParticipantId || resetting" @click="resetParticipant">{{ resetting ? "重置中…" : "重置参与者" }}</button></div>
+          </div>
+        </section>
+      </template>
+    </main>
+  </div>
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, reactive, ref } from "vue";
 import adminApi from "../../admin/adminApi";
 import AdminAcademicMetricChart from "./AdminAcademicMetricChart.vue";
 import AdminAcademicOverallChart from "./AdminAcademicOverallChart.vue";
 import AdminAcademicTaskChart from "./AdminAcademicTaskChart.vue";
 import AdminAcademicSubjectiveChart from "./AdminAcademicSubjectiveChart.vue";
-import AdminParticipantDetails from "./AdminParticipantDetails.vue";
 import { DEMO_ACADEMIC_DATA, DEMO_ACADEMIC_METRICS, DEMO_PREFERENCE_DATA, buildAcademicDataFromSummary, buildMetricSeriesFromSummary, buildPreferenceSeriesFromSummary } from "../../admin/adminDemoData";
 import "./admin.css";
+import "./admin-dashboard.css";
 
 const props = defineProps({ username: { type: String, default: "admin" } });
 const emit = defineEmits(["logout"]);
@@ -164,6 +263,36 @@ const resetting = ref(false);
 const error = ref("");
 const resetParticipantId = ref("");
 const showDemoData = ref(false);
+const exportMenuOpen = ref(false);
+const activeSection = ref("section-overview");
+
+const collapsedSections = reactive({
+  academicOverall: false,
+  core: false,
+  task: false,
+  reading: false,
+  interaction: false,
+  subjective: false,
+  preference: false,
+  analysis: false,
+  quality: false,
+  operations: false,
+});
+
+const navItems = [
+  { id: "section-overview", label: "实验总览" },
+  { id: "section-filters", label: "筛选数据" },
+  { id: "section-academic-overall", label: "论文风格统计图" },
+  { id: "section-core", label: "核心结果图" },
+  { id: "section-task", label: "任务表现图" },
+  { id: "section-reading", label: "阅读行为图" },
+  { id: "section-interaction", label: "评论交互图" },
+  { id: "section-subjective", label: "主观评价图" },
+  { id: "section-preference", label: "偏好结果图" },
+  { id: "section-analysis", label: "描述性结果分析" },
+  { id: "section-quality", label: "数据完整性" },
+  { id: "section-operations", label: "数据操作" },
+];
 
 const coreMetrics = [
   { name: "CTIA", title: "CTIA · 正文—评论关联准确率", format: formatAccuracy, higherIsBetter: true, chartType: "scatter", domain: [0, 1] },
@@ -219,12 +348,39 @@ const overviewCards = computed(() => [
 const analysisStatements = computed(() => analysis.value?.statements || []);
 const academicChartData = computed(() => showDemoData.value ? DEMO_ACADEMIC_DATA : buildAcademicDataFromSummary(summary.value));
 const preferenceChartData = computed(() => showDemoData.value ? DEMO_PREFERENCE_DATA : buildPreferenceSeriesFromSummary(summary.value));
-const participantDetails = computed(() => summary.value?.participant_details || []);
-const participantTasks = computed(() => summary.value?.participant_tasks || []);
 const subjectiveChartSeries = computed(() => Object.fromEntries(subjectiveMetrics.map(item => [item.name, academicMetricSeries(item.name)])));
 const continuityChartSeries = computed(() => Object.fromEntries(subjectiveMetrics.slice(0, 2).map(item => [item.name, academicMetricSeries(item.name)])));
 const qualityIssues = computed(() => quality.value?.issues || []);
 const lastUpdatedText = computed(() => summary.value?.last_updated_at ? `最近活动：${formatDate(summary.value.last_updated_at)}` : "暂无实验数据");
+
+// 核心结果摘要卡片：计算各指标在可见条件下的均值
+const coreSummaryCards = computed(() => {
+  const visibleConds = filters.value.condition ? [filters.value.condition] : conditions;
+  function meanFor(metricName) {
+    const vals = [];
+    let totalN = 0;
+    for (const cond of visibleConds) {
+      const item = summary.value?.metrics?.[metricName]?.[cond];
+      if (item?.mean != null && item?.n) {
+        vals.push({ mean: Number(item.mean), n: Number(item.n) });
+        totalN += Number(item.n);
+      }
+    }
+    if (!vals.length) return { value: "—", n: 0 };
+    const weighted = vals.reduce((sum, v) => sum + v.mean * v.n, 0) / totalN;
+    return { value: weighted, n: totalN };
+  }
+  const ctia = meanFor("CTIA");
+  const ctirt = meanFor("CTIRT");
+  const cra = meanFor("CRA");
+  const aca = meanFor("ACA");
+  return [
+    { metric: "CTIA", label: "CTIA 准确率（均值）", value: ctia.value === "—" ? "—" : formatAccuracy(ctia.value), n: ctia.n },
+    { metric: "CTIRT", label: "CTIRT 反应时间（均值）", value: ctirt.value === "—" ? "—" : `${formatSeconds(ctirt.value)} s`, n: ctirt.n },
+    { metric: "CRA", label: "CRA 准确率（均值）", value: cra.value === "—" ? "—" : formatAccuracy(cra.value), n: cra.n },
+    { metric: "ACA", label: "ACA 准确率（均值）", value: aca.value === "—" ? "—" : formatAccuracy(aca.value), n: aca.n },
+  ];
+});
 
 function metric(name) { return summary.value?.metrics?.[name] || {}; }
 function academicMetricSeries(name) { return showDemoData.value ? (DEMO_ACADEMIC_METRICS[name] || { }) : buildMetricSeriesFromSummary(summary.value, name); }
@@ -240,6 +396,38 @@ function formatDate(value) {
 }
 function preferenceRank(condition) { return preference.value.rank?.[condition]?.mean == null ? "—" : Number(preference.value.rank[condition].mean).toFixed(2); }
 function clearFilters() { filters.value = { participant_id: "", article_id: "", condition: "", status: "" }; loadAll(); }
+
+function toggleSection(key) {
+  collapsedSections[key] = !collapsedSections[key];
+}
+
+function scrollToSection(id) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+    activeSection.value = id;
+  }
+}
+
+// 滚动监听：高亮当前区块
+let scrollObserver = null;
+function setupScrollSpy() {
+  const sectionEls = navItems.map(item => document.getElementById(item.id)).filter(Boolean);
+  if (!sectionEls.length || !("IntersectionObserver" in window)) return;
+  scrollObserver = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      if (entry.isIntersecting) {
+        activeSection.value = entry.target.id;
+      }
+    }
+  }, { rootMargin: "-20% 0px -70% 0px", threshold: 0 });
+  sectionEls.forEach(el => scrollObserver.observe(el));
+}
+
+function quickExport(format, dataset) {
+  exportMenuOpen.value = false;
+  download(format, dataset);
+}
 
 async function loadAll() {
   loading.value = true;
@@ -278,5 +466,20 @@ async function resetParticipant() {
   try { await adminApi.resetParticipant(resetParticipantId.value); resetParticipantId.value = ""; await loadAll(); } catch (requestError) { error.value = requestError.message; } finally { resetting.value = false; }
 }
 
-onMounted(loadAll);
+// 点击外部关闭导出菜单
+function handleClickOutside(e) {
+  if (exportMenuOpen.value && !e.target.closest(".admin-quick-export")) {
+    exportMenuOpen.value = false;
+  }
+}
+
+onMounted(() => {
+  loadAll();
+  setTimeout(setupScrollSpy, 500);
+  document.addEventListener("click", handleClickOutside);
+});
+onUnmounted(() => {
+  if (scrollObserver) scrollObserver.disconnect();
+  document.removeEventListener("click", handleClickOutside);
+});
 </script>

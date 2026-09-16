@@ -1,0 +1,201 @@
+/* 顶部全局概览卡片 */
+.admin-global-cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 0;
+}
+.admin-global-card {
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.admin-global-card .admin-stat-label {
+  font-size: 13px;
+  font-weight: 750;
+  color: #4a6270;
+}
+.admin-global-card-value {
+  font-size: 30px;
+  font-weight: 850;
+  color: #1e5360;
+  line-height: 1.1;
+}
+.admin-global-card-value small {
+  font-size: 16px;
+  font-weight: 600;
+  color: #8a9aa2;
+}
+.admin-global-card-stats {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.admin-global-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 11px;
+  color: #71838d;
+  font-weight: 600;
+}
+.admin-global-stat strong {
+  font-size: 20px;
+  font-weight: 850;
+  line-height: 1.1;
+}
+.text-complete { color: #17654d; }
+.text-active { color: #b5791a; }
+.text-muted { color: #8a9aa2; }
+
+/* 进度条 */
+.admin-progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #e8eef0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.admin-progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #2f8b76, #3a9d6e);
+  border-radius: 4px;
+  transition: width .4s ease;
+}
+.admin-progress-bar-text {
+  font-size: 11px;
+  color: #8a9aa2;
+  font-weight: 600;
+}
+
+/* 高级筛选折叠 */
+.admin-advanced-toggle {
+  grid-column: 1 / -1;
+  background: none;
+  border: none;
+  color: #2f756f;
+  font-size: 13px;
+  font-weight: 750;
+  cursor: pointer;
+  padding: 4px 0;
+  text-align: left;
+}
+.admin-advanced-toggle:hover { text-decoration: underline; }
+.admin-advanced-filters {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding-top: 4px;
+  border-top: 1px dashed #d9e5e8;
+}
+
+/* 标签页 */
+.admin-tabs {
+  display: flex;
+  gap: 4px;
+  margin: 16px 0 4px;
+  padding: 4px;
+  background: #eef3f4;
+  border-radius: 10px;
+  overflow-x: auto;
+}
+.admin-tab {
+  flex: 0 0 auto;
+  padding: 9px 16px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: #5d7480;
+  font-size: 13px;
+  font-weight: 750;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all .15s;
+}
+.admin-tab:hover { color: #1d5361; background: #e0eaea; }
+.admin-tab.active {
+  color: #fff;
+  background: #286b78;
+  box-shadow: 0 2px 6px rgba(40, 107, 120, .2);
+}
+
+/* 参与者详情右侧抽屉 */
+.admin-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 40, 50, .45);
+  z-index: 900;
+}
+.admin-participant-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(720px, 92vw);
+  background: #f4f7f9;
+  z-index: 950;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -8px 0 40px rgba(20, 40, 50, .2);
+}
+.admin-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: #fff;
+  border-bottom: 1px solid #d9e5e8;
+  flex-shrink: 0;
+}
+.admin-drawer-header h2 {
+  margin: 0;
+  color: #17324d;
+  font-size: 18px;
+}
+.admin-drawer-close {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  background: #e9f1f2;
+  color: #28586b;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.admin-drawer-close:hover { background: #dde8ea; }
+.admin-drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px 32px;
+}
+.admin-drawer-body .admin-participant-details {
+  margin-top: 0;
+}
+
+/* 抽屉过渡动画 */
+.drawer-fade-enter-active, .drawer-fade-leave-active {
+  transition: opacity .25s ease;
+}
+.drawer-fade-enter-from, .drawer-fade-leave-to {
+  opacity: 0;
+}
+.drawer-slide-enter-active, .drawer-slide-leave-active {
+  transition: transform .3s cubic-bezier(.22, 1, .36, 1);
+}
+.drawer-slide-enter-from, .drawer-slide-leave-to {
+  transform: translateX(100%);
+}
+
+/* 响应式 */
+@media (max-width: 1100px) {
+  .admin-global-cards { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 760px) {
+  .admin-global-cards { grid-template-columns: 1fr; }
+  .admin-advanced-filters { grid-template-columns: 1fr; }
+}

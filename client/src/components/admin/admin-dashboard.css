@@ -1,0 +1,190 @@
+/* 研究分析工作台整体布局 */
+.admin-workspace-shell {
+  display: flex;
+  min-height: 100vh;
+  background: #f4f7f9;
+}
+
+/* 左侧固定导航栏 */
+.admin-workspace-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 200px;
+  padding: 20px 12px;
+  background: #fff;
+  border-right: 1px solid #d9e5e8;
+  overflow-y: auto;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.admin-workspace-nav-title {
+  padding: 0 10px 14px;
+  color: #17324d;
+  font-size: 14px;
+  font-weight: 850;
+  border-bottom: 1px solid #edf1f2;
+  margin-bottom: 8px;
+}
+.admin-workspace-nav-link {
+  display: block;
+  padding: 9px 12px;
+  border-radius: 7px;
+  color: #5d7480;
+  font-size: 13px;
+  font-weight: 650;
+  text-decoration: none;
+  transition: all .15s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.admin-workspace-nav-link:hover {
+  color: #1d5361;
+  background: #e8f1f1;
+}
+.admin-workspace-nav-link.active {
+  color: #fff;
+  background: #286b78;
+  font-weight: 750;
+}
+
+/* 主内容区留出左边距 */
+.admin-workspace-main {
+  margin-left: 200px;
+  width: calc(100% - 200px);
+  max-width: none;
+}
+
+/* 区块间距 */
+.admin-workspace-section {
+  scroll-margin-top: 16px;
+}
+
+/* 可折叠区块标题栏 */
+.admin-collapsible-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  padding: 4px 0;
+  user-select: none;
+}
+.admin-collapsible-heading:hover {
+  opacity: .85;
+}
+.admin-collapsible-heading h2 {
+  margin: 0 0 6px;
+}
+.admin-collapse-icon {
+  flex-shrink: 0;
+  color: #71838d;
+  font-size: 12px;
+  margin-top: 6px;
+  transition: transform .2s;
+}
+
+/* 核心结果摘要卡片 */
+.admin-core-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.admin-core-summary-card {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.admin-core-summary-card .admin-stat-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #5a7180;
+}
+.admin-core-summary-value {
+  font-size: 26px;
+  font-weight: 850;
+  color: #1e5360;
+  line-height: 1.15;
+}
+.admin-core-summary-n {
+  font-size: 11px;
+  color: #8a9aa2;
+  font-weight: 600;
+}
+
+/* 顶部快速导出下拉 */
+.admin-quick-export {
+  position: relative;
+}
+.admin-quick-export-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 180px;
+  background: #fff;
+  border: 1px solid #d9e5e8;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(38, 74, 87, .12);
+  z-index: 100;
+  overflow: hidden;
+}
+.admin-quick-export-menu button {
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  background: none;
+  color: #28586b;
+  font-size: 13px;
+  font-weight: 650;
+  text-align: left;
+  cursor: pointer;
+  transition: background .12s;
+}
+.admin-quick-export-menu button:hover {
+  background: #eef5f5;
+}
+
+/* 响应式 */
+@media (max-width: 1100px) {
+  .admin-core-summary-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 900px) {
+  .admin-workspace-nav {
+    position: static;
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    bottom: auto;
+    border-right: none;
+    border-bottom: 1px solid #d9e5e8;
+    padding: 12px;
+  }
+  .admin-workspace-nav-title {
+    width: 100%;
+    border-bottom: none;
+    margin-bottom: 4px;
+    padding-bottom: 4px;
+  }
+  .admin-workspace-nav-link {
+    flex: 0 0 auto;
+    padding: 7px 12px;
+    font-size: 12px;
+  }
+  .admin-workspace-main {
+    margin-left: 0;
+    width: 100%;
+  }
+  .admin-workspace-shell {
+    flex-direction: column;
+  }
+}
+@media (max-width: 650px) {
+  .admin-core-summary-grid { grid-template-columns: 1fr; }
+}
