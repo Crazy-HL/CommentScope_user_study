@@ -5,7 +5,7 @@
       <span v-if="participantId" class="participant">{{ participantId }}</span>
     </div>
     <div class="header-right">
-      <span v-if="conditionLabel" class="condition-label">{{ conditionLabel }}</span>
+      <span v-if="conditionLabel" class="condition-label" :class="`condition-${conditionCode.toLowerCase()}`">{{ conditionLabel }}</span>
       <span v-if="articleOrder" class="progress-text">文章 {{ articleOrder }} / 4 · {{ stageTitle }}</span>
       <span v-else class="progress-text">{{ stageTitle }}</span>
       <button v-if="participantId" type="button" class="exit-btn" @click="handleExit" title="退出当前实验，返回选择页面">退出实验</button>
@@ -26,6 +26,8 @@ const props = defineProps({
 const emit = defineEmits(["exit"]);
 const stageTitle = computed(() => STAGE_TITLES[props.stage] || "实验进行中");
 const conditionLabel = computed(() => props.renderMode ? conditionLabelForRenderMode(props.renderMode) : "");
+const RENDER_MODE_TO_CODE = { layout_a: "TE", layout_b: "CS", layout_c: "SE", layout_d: "BL" };
+const conditionCode = computed(() => RENDER_MODE_TO_CODE[props.renderMode] || "");
 
 function handleExit() {
   const confirmed = window.confirm(
@@ -40,7 +42,11 @@ function handleExit() {
 .header-left { display: flex; align-items: center; gap: 4px; }
 .header-right { display: flex; align-items: center; gap: 16px; }
 .participant { margin-left: 12px; padding: 3px 9px; border-radius: 999px; color: #35536f; background: #eef4f8; font-size: 13px; }
-.condition-label { padding: 5px 12px; border-radius: 6px; color: #fff; background: linear-gradient(135deg, #2b7a78, #1a5f5d); font-size: 13px; font-weight: 700; white-space: nowrap; }
+.condition-label { padding: 5px 12px; border-radius: 6px; color: #fff; font-size: 13px; font-weight: 700; white-space: nowrap; }
+.condition-label.condition-te { background: linear-gradient(135deg, #2b7a78, #1a5f5d); }
+.condition-label.condition-cs { background: linear-gradient(135deg, #c0792e, #a06020); }
+.condition-label.condition-se { background: linear-gradient(135deg, #5a6fa8, #45588a); }
+.condition-label.condition-bl { background: linear-gradient(135deg, #8b5a8b, #6e456e); }
 .progress-text { color: #526b82; font-size: 14px; }
 .exit-btn {
   padding: 5px 12px;
