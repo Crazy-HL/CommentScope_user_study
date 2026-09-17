@@ -91,12 +91,15 @@
                     </span>
                   </span>
 
-                  <!-- Between-Line: 评论以块形式穿插在行之间，纯文本展示，不可点击 -->
+                  <!-- Between-Line: 评论以块形式穿插在行之间，点击可展开/收起 -->
                   <div
                     v-if="mode === 'be' && showInlineComments && topComment(sentence.index)"
                     class="absolute-comment embedded-comment-neutral"
-                    :title="topComment(sentence.index).text">
+                    :class="{ 'comment-expanded': expandedInlineComments[sentence.index] }"
+                    :title="expandedInlineComments[sentence.index] ? '点击收起' : '点击展开完整评论'"
+                    @click="toggleInlineComment(sentence.index)">
                     {{ topComment(sentence.index).text }}
+                    <span v-if="!expandedInlineComments[sentence.index]" class="comment-expand-hint">点击展开</span>
                   </div>
                 </template>
               </div>
@@ -245,6 +248,7 @@ export default defineComponent({
       likeThreshold: 0,
       replyThreshold: 0,
       expandedParagraphs: {},
+      expandedInlineComments: {},
       connectionStyle: { left: "0px", top: "0px", width: "0px", transform: "rotate(0deg)", transformOrigin: "0 0" },
       defaultAvatar: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI2NjYyIgZD0iTTEyLDJBMTAsMTAgMCAwLDAgMiwxMkExMCwxMCAwIDAsMCAxMiwyMkExMCwxMCAwIDAsMCAyMiwxMkExMCwxMCAwIDAsMCAxMiwyTTEyLDRBNyA3IDAgMCwxIDE5LDExQTcgNyAwIDAsMSAxMiwxOEE3LDcgMCAwLDEgNSwxMUE3LDcgMCAwLDEgMTIsNE0xMiw2QTUsNSAwIDAsMCA3LDExQTUsNSAwIDAsMCAxMiwxNkE1LDUgMCAwLDAgMTcsMTFBNSw1IDAgMCwwIDEyLDZNMTIsOEEzLDMgMCAwLDEgMTUsMTFBNCw4IDAgMCwxIDEyLDE1QTQsNCAwIDAsMSA5LDExQTMsMyAwIDAsMSAxMiw4WiIvPjwvc3ZnPg=="
     };
@@ -371,6 +375,9 @@ export default defineComponent({
     window.removeEventListener("scroll", this.updateConnectionLine, true);
   },
   methods: {
+    toggleInlineComment(sentenceIndex) {
+      this.$set(this.expandedInlineComments, sentenceIndex, !this.expandedInlineComments[sentenceIndex]);
+    },
     isGlobal(item) {
       return item.comment.global === true || item.comment.scope === "global" || (Array.isArray(item.comment.link) && (item.comment.link.length === 0 || item.comment.link[0] === -1));
     },
@@ -520,13 +527,34 @@ export default defineComponent({
   color: #555;
   background: none;
   padding: 0;
-  pointer-events: none;
-  cursor: default;
+  pointer-events: auto;
+  cursor: pointer;
   line-height: 1.5;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   z-index: 5;
+  transition: background .15s;
+  border-radius: 3px;
+}
+.absolute-comment:hover {
+  background: rgba(79, 111, 130, 0.06);
+}
+.absolute-comment.comment-expanded {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  padding: 4px 8px;
+  background: rgba(79, 111, 130, 0.06);
+  border-left: 2px solid #4f6f82;
+}
+.comment-expand-hint {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: 0.85em;
+  color: #7a93a3;
+  text-decoration: underline;
+  white-space: nowrap;
 }
 .embedded-comment-neutral {
   color: #4f6f82;
