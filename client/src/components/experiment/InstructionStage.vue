@@ -16,6 +16,9 @@
         <div class="condition-card" :class="conditionClass">
           <span class="condition-label">{{ conditionLabel }}</span>
           <span class="condition-desc">{{ conditionDesc }}</span>
+          <div class="condition-screenshot">
+            <img :src="conditionImage" :alt="conditionLabel" />
+          </div>
         </div>
         <p class="condition-hint">不同文章会使用不同的评论展示方式，请自然阅读即可。</p>
       </div>
@@ -46,16 +49,17 @@ const props = defineProps({
 defineEmits(["continue"]);
 
 const CONDITION_INFO = {
-  TE: { label: "文末集中 (Text-End)", desc: "所有评论集中显示在文章末尾，阅读完正文后可查看评论。", class: "te" },
-  CS: { label: "点击查看 (Click-to-Show)", desc: "正文中有评论的位置会显示标记，点击标记可在侧边栏查看评论。", class: "cs" },
-  SE: { label: "句末跟随 (Sentence-End)", desc: "评论紧跟在相关句子的末尾，与正文连续显示。", class: "se" },
-  BL: { label: "行间穿插 (Between-Line)", desc: "评论以独立段落的形式穿插在正文段落之间。", class: "bl" }
+  TE: { label: "文末集中 (Text-End)", desc: "所有评论集中显示在文章末尾，阅读完正文后可查看评论。", class: "te", image: "/conditions/te.png" },
+  CS: { label: "点击查看 (Click-to-Show)", desc: "正文中有评论的位置会显示标记，点击标记可在侧边栏查看评论。", class: "cs", image: "/conditions/cs.png" },
+  SE: { label: "句末跟随 (Sentence-End)", desc: "评论紧跟在相关句子的末尾，与正文连续显示。", class: "se", image: "/conditions/se.png" },
+  BL: { label: "行间穿插 (Between-Line)", desc: "评论以独立段落的形式穿插在正文段落之间。", class: "bl", image: "/conditions/bl.png" }
 };
 
-const conditionInfo = computed(() => CONDITION_INFO[props.condition] || { label: "", desc: "", class: "" });
+const conditionInfo = computed(() => CONDITION_INFO[props.condition] || { label: "", desc: "", class: "", image: "" });
 const conditionLabel = computed(() => conditionInfo.value.label);
 const conditionDesc = computed(() => conditionInfo.value.desc);
 const conditionClass = computed(() => conditionInfo.value.class);
+const conditionImage = computed(() => conditionInfo.value.image);
 </script>
 
 <style scoped>
@@ -78,6 +82,8 @@ p, li { line-height: 1.8; }
 .condition-card.bl { border-left: 4px solid #8b5a8b; }
 .condition-label { font-weight: 700; font-size: 15px; color: #17324d; }
 .condition-desc { font-size: 14px; color: #4a6072; line-height: 1.7; }
+.condition-screenshot { margin-top: 8px; border-radius: 8px; overflow: hidden; border: 1px solid #e0e8ec; max-height: 280px; }
+.condition-screenshot img { width: 100%; display: block; }
 .condition-hint { margin: 10px 0 0; font-size: 13px; color: #7a8ea0; font-style: italic; }
 
 .question-intro { margin: 20px 0; padding: 16px 18px; background: #f8f9fa; border-radius: 10px; }
