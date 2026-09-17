@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CommentScope 用户研究实验方案</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; color: #1a2332; background: #f5f7fa; line-height: 1.7; }
+.container { max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
+h1 { font-size: 32px; color: #17324d; margin-bottom: 8px; }
+.subtitle { font-size: 16px; color: #6b7f8f; margin-bottom: 40px; }
+h2 { font-size: 24px; color: #17324d; margin: 48px 0 20px; padding-bottom: 10px; border-bottom: 2px solid #e2eaed; }
+h3 { font-size: 18px; color: #2c4a5e; margin: 28px 0 14px; }
+h4 { font-size: 15px; color: #3a5566; margin: 20px 0 10px; }
+p { margin-bottom: 12px; }
+
+/* 概览卡片 */
+.overview-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 24px 0; }
+.overview-card { background: #fff; border-radius: 12px; padding: 20px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+.overview-num { font-size: 36px; font-weight: 800; color: #2b7a78; }
+.overview-label { font-size: 13px; color: #6b7f8f; margin-top: 4px; }
+
+/* 条件卡片 */
+.conditions-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin: 20px 0; }
+.condition-card { background: #fff; border-radius: 10px; padding: 18px 20px; box-shadow: 0 2px 8px rgba(0,0,0,.05); }
+.condition-name { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.condition-cn { font-size: 14px; color: #5a6fa8; font-weight: 600; margin-bottom: 8px; }
+.condition-desc { font-size: 13px; color: #6b7f8f; line-height: 1.6; }
+
+/* 表格 */
+table { width: 100%; border-collapse: collapse; margin: 16px 0; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.05); }
+th { background: #2b7a78; color: #fff; padding: 12px 14px; text-align: left; font-size: 13px; font-weight: 600; }
+td { padding: 11px 14px; border-bottom: 1px solid #eef3f4; font-size: 13px; vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #f7fafb; }
+
+/* 流程 */
+.flow-list { margin: 20px 0; }
+.flow-step { display: flex; gap: 16px; margin-bottom: 16px; background: #fff; border-radius: 10px; padding: 16px 20px; box-shadow: 0 2px 8px rgba(0,0,0,.05); }
+.step-num { flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%; background: #2b7a78; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; }
+.step-name { font-size: 15px; font-weight: 700; color: #17324d; margin-bottom: 4px; }
+.step-desc { font-size: 13px; color: #5a6f7f; line-height: 1.6; }
+
+/* 文章部分 */
+.article-section { background: #fff; border-radius: 14px; padding: 28px; margin: 24px 0; box-shadow: 0 2px 12px rgba(0,0,0,.06); }
+.article-meta { display: flex; gap: 10px; flex-wrap: wrap; margin: 12px 0 20px; }
+.meta-tag { background: #eef4f8; color: #35536f; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+
+/* 评论 */
+.comments-list { display: flex; flex-direction: column; gap: 12px; }
+.comment-item { background: #f8fafb; border-radius: 8px; padding: 14px 16px; border-left: 3px solid #b9d8e4; }
+.comment-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.comment-id { background: #2b7a78; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; }
+.comment-stats { font-size: 12px; color: #8a9aa2; }
+.comment-text { font-size: 13px; color: #2c4a5e; line-height: 1.7; margin-bottom: 8px; }
+.comment-anchor { font-size: 12px; color: #8a9aa2; font-style: italic; }
+
+/* 题目 */
+.question-group { margin-bottom: 24px; }
+.question-item { background: #fafcfc; border: 1px solid #e6edef; border-radius: 8px; padding: 14px 16px; margin-bottom: 12px; }
+.question-id { display: inline-block; background: #5a6fa8; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; margin-bottom: 8px; }
+.question-prompt { font-size: 14px; color: #2c4a5e; line-height: 1.7; margin-bottom: 10px; font-weight: 500; }
+.options { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+.option { display: flex; align-items: flex-start; gap: 8px; padding: 6px 10px; border-radius: 6px; font-size: 13px; color: #4a6274; }
+.option.correct { background: #e8f5e9; color: #2e7d32; font-weight: 600; }
+.option-key { flex-shrink: 0; width: 20px; height: 20px; border-radius: 50%; background: #dce5ee; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+.option.correct .option-key { background: #4caf50; color: #fff; }
+.answer-label { font-size: 12px; color: #8a9aa2; }
+.answer-label strong { color: #2e7d32; }
+
+/* 访谈 */
+.interview-q { display: flex; gap: 12px; padding: 12px 16px; background: #f8fafb; border-radius: 8px; margin-bottom: 8px; font-size: 14px; color: #2c4a5e; }
+.q-num { flex-shrink: 0; background: #8b5a8b; color: #fff; width: 28px; height: 24px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+
+/* 目录 */
+.toc { background: #fff; border-radius: 12px; padding: 24px; margin: 24px 0; box-shadow: 0 2px 8px rgba(0,0,0,.05); }
+.toc h3 { margin-top: 0; }
+.toc ul { list-style: none; }
+.toc li { margin: 6px 0; }
+.toc a { color: #2b7a78; text-decoration: none; font-size: 14px; }
+.toc a:hover { text-decoration: underline; }
+
+@media (max-width: 768px) {
+    .overview-grid { grid-template-columns: repeat(2, 1fr); }
+    .conditions-grid { grid-template-columns: 1fr; }
+    .container { padding: 20px 12px; }
+    .article-section { padding: 18px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>CommentScope 用户研究实验方案</h1>
+<p class="subtitle">在线评论展示界面对阅读体验与信息整合影响的对照实验</p>
+
+<!-- 目录 -->
+<div class="toc">
+<h3>目录</h3>
+<ul>
+<li><a href="#overview">一、实验概述</a></li>
+<li><a href="#conditions">二、四种评论展示界面</a></li>
+<li><a href="#design">三、实验设计（拉丁方）</a></li>
+<li><a href="#flow">四、实验流程</a></li>
+<li><a href="#metrics">五、评价指标</a></li>
+<li><a href="#data">六、收集的数据</a></li>
+<li><a href="#articles">七、实验材料（文章、评论、题目）</a></li>
+</ul>
+</div>
+
+<!-- 一、实验概述 -->
+<h2 id="overview">一、实验概述</h2>
+<p>本实验旨在研究不同的在线评论展示方式如何影响用户的阅读体验、评论记忆、评论-正文关联能力以及主观工作负荷。实验采用<strong>被试内设计</strong>，每位参与者在四种评论展示界面下各阅读一篇文章，通过拉丁方设计平衡文章顺序和界面条件的混淆效应。</p>
+
+<div class="overview-grid">
+<div class="overview-card"><div class="overview-num">24</div><div class="overview-label">参与者</div></div>
+<div class="overview-card"><div class="overview-num">4</div><div class="overview-label">评论展示界面</div></div>
+<div class="overview-card"><div class="overview-num">4</div><div class="overview-label">实验文章</div></div>
+<div class="overview-card"><div class="overview-num">40</div><div class="overview-label">评论（每篇10条）</div></div>
+</div>
+
+<div class="overview-grid">
+<div class="overview-card"><div class="overview-num">40</div><div class="overview-label">测试题（每篇10道）</div></div>
+<div class="overview-card"><div class="overview-num">9</div><div class="overview-label">评价指标</div></div>
+<div class="overview-card"><div class="overview-num">4</div><div class="overview-label">拉丁方分组</div></div>
+<div class="overview-card"><div class="overview-num">6</div><div class="overview-label">人/组</div></div>
+</div>
+
+<!-- 二、四种评论展示界面 -->
+<h2 id="conditions">二、四种评论展示界面</h2>
+<p>实验设置四种评论展示条件，每种条件下评论与正文的空间关系不同：</p>
+<div class="conditions-grid">
+    <div class="condition-card" style="border-left: 4px solid #2b7a78;">
+        <div class="condition-name" style="color: #2b7a78;">Text-End (TE)</div>
+        <div class="condition-cn">文末集中</div>
+        <div class="condition-desc">所有评论集中显示在文章末尾，阅读时不打断正文。</div>
+    </div>
+    <div class="condition-card" style="border-left: 4px solid #c0792e;">
+        <div class="condition-name" style="color: #c0792e;">Click-to-Show (CS)</div>
+        <div class="condition-cn">点击查看</div>
+        <div class="condition-desc">正文中有评论的句子带下划线，点击句子在侧边栏查看评论。</div>
+    </div>
+    <div class="condition-card" style="border-left: 4px solid #5a6fa8;">
+        <div class="condition-name" style="color: #5a6fa8;">Sentence-End (SE)</div>
+        <div class="condition-cn">句末跟随</div>
+        <div class="condition-desc">每条评论紧跟在其所评论的句子后面，阅读时自然衔接。</div>
+    </div>
+    <div class="condition-card" style="border-left: 4px solid #8b5a8b;">
+        <div class="condition-name" style="color: #8b5a8b;">Between-Line (BL)</div>
+        <div class="condition-cn">行间穿插</div>
+        <div class="condition-desc">评论穿插在正文段落之间，与正文交替呈现。</div>
+    </div></div>
+
+<!-- 三、实验设计 -->
+<h2 id="design">三、实验设计（4×4 拉丁方）</h2>
+<p>24名参与者分为4组，每组6人。采用拉丁方设计确保：①每位参与者体验全部4种界面；②每篇文章在每种界面下被阅读6次；③文章顺序与界面条件完全交叉平衡。</p>
+<table>
+<thead><tr><th>组别</th><th>参与者</th><th>文章阅读顺序</th><th>文章-界面分配</th></tr></thead>
+<tbody>
+    <tr>
+        <td><strong>G1</strong></td>
+        <td>P01-P06</td>
+        <td>A02→A03→A04→A07</td>
+        <td>A02=TE, A03=CS, A04=SE, A07=BL</td>
+    </tr>
+    <tr>
+        <td><strong>G2</strong></td>
+        <td>P07-P12</td>
+        <td>A03→A04→A07→A02</td>
+        <td>A02=CS, A03=SE, A04=BL, A07=TE</td>
+    </tr>
+    <tr>
+        <td><strong>G3</strong></td>
+        <td>P13-P18</td>
+        <td>A04→A07→A02→A03</td>
+        <td>A02=SE, A03=BL, A04=TE, A07=CS</td>
+    </tr>
+    <tr>
+        <td><strong>G4</strong></td>
+        <td>P19-P24</td>
+        <td>A07→A02→A03→A04</td>
+        <td>A02=BL, A03=TE, A04=CS, A07=SE</td>
+    </tr></tbody>
+</table>
+
+<!-- 四、实验流程 -->
+<h2 id="flow">四、实验流程</h2>
+<p>每位参与者完成4篇文章的阅读和测试后，进行界面偏好排序和半结构化访谈。每篇文章的流程如下：</p>
+<div class="flow-list">
+    <div class="flow-step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+            <div class="step-name">实验说明</div>
+            <div class="step-desc">参与者阅读实验说明，了解任务要求。</div>
+        </div>
+    </div>
+    <div class="flow-step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+            <div class="step-name">自然阅读</div>
+            <div class="step-desc">参与者在指定评论展示界面下自然阅读文章，无时间限制。系统记录阅读时间、滚动距离、评论交互等行为数据。</div>
+        </div>
+    </div>
+    <div class="flow-step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+            <div class="step-name">评论识别 (CRA)</div>
+            <div class="step-desc">文章与评论隐藏，逐题显示4条评论观点，参与者判断"出现过"或"未出现过"。2条真实出现过 + 2条干扰观点。测量评论是否自然进入阅读记忆。</div>
+        </div>
+    </div>
+    <div class="flow-step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+            <div class="step-name">文章理解 (ACA)</div>
+            <div class="step-desc">2道只根据正文作答的单选题。测量评论呈现方式是否干扰正文理解。</div>
+        </div>
+    </div>
+    <div class="flow-step">
+        <div class="step-num">5</div>
+        <div class="step-content">
+            <div class="step-name">评论理解 (CTIA)</div>
+            <div class="step-desc">2道必须同时依赖正文和评论的题目，问评论主要对应正文哪处内容。测量评论-正文关联建立能力，同时记录答题时间(CTIRT)。</div>
+        </div>
+    </div>
+    <div class="flow-step">
+        <div class="step-num">6</div>
+        <div class="step-content">
+            <div class="step-name">信息定位 (Location)</div>
+            <div class="step-desc">2道定位题：①从评论观点找对应评论；②从评论找对应正文位置。测量评论导航能力，记录定位准确率(CLA)和时间(CLT)。</div>
+        </div>
+    </div>
+    <div class="flow-step">
+        <div class="step-num">7</div>
+        <div class="step-content">
+            <div class="step-name">阅读体验评价</div>
+            <div class="step-desc">NASA-TLX 6项主观工作负荷评价 + 阅读连续性(RC) + 评论可访问性(CA) 两项1-7分评价。</div>
+        </div>
+    </div>
+    <div class="flow-step">
+        <div class="step-num">8</div>
+        <div class="step-content">
+            <div class="step-name">界面偏好排序</div>
+            <div class="step-desc">完成4篇文章后，参与者对四种评论展示界面进行偏好排序，并说明首选理由。</div>
+        </div>
+    </div>
+    <div class="flow-step">
+        <div class="step-num">9</div>
+        <div class="step-content">
+            <div class="step-name">使用体验反馈</div>
+            <div class="step-desc">4道半结构化访谈问题，收集参与者对四种界面的主观体验和改进建议。</div>
+        </div>
+    </div></div>
+
+<h3>半结构化访谈问题（4题）</h3>
+<div class="interview-q"><span class="q-num">Q1</span> 在四种评论展示界面中，你最喜欢哪一种？为什么？</div><div class="interview-q"><span class="q-num">Q2</span> 哪一种评论展示界面最影响你的连续阅读？请描述具体情况。</div><div class="interview-q"><span class="q-num">Q3</span> 你在查找评论与正文关系时采用了什么方法？</div><div class="interview-q"><span class="q-num">Q4</span> 如果可以改进这些评论展示界面，你最希望修改什么？</div>
+
+<!-- 五、评价指标 -->
+<h2 id="metrics">五、评价指标</h2>
+<table>
+<thead><tr><th>指标代码</th><th>指标名称</th><th>计算方式</th><th>取值范围</th><th>说明</th></tr></thead>
+<tbody>
+    <tr>
+        <td><strong>CRA</strong></td>
+        <td>评论识别准确率</td>
+        <td>答对题数 / 4</td>
+        <td>0.00 - 1.00</td>
+        <td>测量参与者在无提示记忆要求下，是否自然记住了评论内容。</td>
+    </tr>
+    <tr>
+        <td><strong>ACA</strong></td>
+        <td>文章理解准确率</td>
+        <td>答对题数 / 2</td>
+        <td>0.00 - 1.00</td>
+        <td>测量评论呈现方式是否干扰了正文阅读和理解。理想情况四种界面无显著差异。</td>
+    </tr>
+    <tr>
+        <td><strong>CTIA</strong></td>
+        <td>评论-正文整合准确率</td>
+        <td>答对题数 / 2</td>
+        <td>0.00 - 1.00</td>
+        <td>测量参与者能否建立"这条评论在讨论正文什么内容"的关联。</td>
+    </tr>
+    <tr>
+        <td><strong>CTIRT</strong></td>
+        <td>评论-正文整合反应时间</td>
+        <td>2道CTIA题平均答题时间</td>
+        <td>秒</td>
+        <td>测量建立评论-正文关联需要多少时间。</td>
+    </tr>
+    <tr>
+        <td><strong>CLA</strong></td>
+        <td>评论定位准确率</td>
+        <td>答对题数 / 2</td>
+        <td>0.00 - 1.00</td>
+        <td>测量参与者能否找到相关评论并完成评论-正文导航。</td>
+    </tr>
+    <tr>
+        <td><strong>CLT</strong></td>
+        <td>评论定位时间</td>
+        <td>2道定位题平均答题时间</td>
+        <td>秒</td>
+        <td>测量找到相关评论需要多少时间。</td>
+    </tr>
+    <tr>
+        <td><strong>NASA-TLX</strong></td>
+        <td>主观工作负荷</td>
+        <td>6项量表评分</td>
+        <td>1-7分/项</td>
+        <td>心理需求、身体需求、时间压力、自我表现、努力程度、挫败感。主要关注Mental Demand、Effort、Frustration三项。</td>
+    </tr>
+    <tr>
+        <td><strong>RC</strong></td>
+        <td>阅读连续性</td>
+        <td>单题1-7分评价</td>
+        <td>1-7分</td>
+        <td>"我能够保持连续、流畅的正文阅读"。分数越高表示阅读越连续流畅。</td>
+    </tr>
+    <tr>
+        <td><strong>CA</strong></td>
+        <td>评论可访问性</td>
+        <td>单题1-7分评价</td>
+        <td>1-7分</td>
+        <td>"我能够容易地找到并理解与当前正文相关的评论"。分数越高表示评论越容易访问和理解。</td>
+    </tr></tbody>
+</table>
+
+<!-- 六、收集的数据 -->
+<h2 id="data">六、收集的数据</h2>
+<h3>行为数据</h3>
+<table>
+<thead><tr><th>数据项</th><th>说明</th></tr></thead>
+<tbody><tr><td>阅读开始时间</td><td>参与者开始阅读文章的时间戳</td></tr><tr><td>阅读结束时间</td><td>参与者结束阅读进入答题阶段的时间戳</td></tr><tr><td>阅读时长</td><td>阅读结束 - 阅读开始，单位秒</td></tr><tr><td>总滚动距离</td><td>阅读过程中页面滚动的总距离（像素/米）</td></tr><tr><td>评论卡片点击数</td><td>CS模式下点击有评论句子的次数</td></tr><tr><td>侧边栏打开次数</td><td>CS模式下评论侧边栏打开的次数</td></tr><tr><td>侧边栏关闭次数</td><td>CS模式下评论侧边栏关闭的次数</td></tr><tr><td>每题答题时间</td><td>每道题从显示到提交的时间</td></tr><tr><td>答题答案</td><td>每道题参与者选择的答案</td></tr></tbody>
+</table>
+
+<h3>主观评价数据</h3>
+<table>
+<thead><tr><th>数据项</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td>NASA-TLX 六项评分</td><td>Mental Demand、Physical Demand、Temporal Demand、Performance、Effort、Frustration，每项1-7分</td></tr>
+<tr><td>阅读连续性 (RC)</td><td>单题1-7分评价</td></tr>
+<tr><td>评论可访问性 (CA)</td><td>单题1-7分评价</td></tr>
+<tr><td>界面偏好排序</td><td>四种界面的偏好排序（第1-4名）+ 首选理由</td></tr>
+<tr><td>访谈回答</td><td>4道半结构化访谈问题的文字回答</td></tr>
+</tbody>
+</table>
+
+<!-- 七、实验材料 -->
+<h2 id="articles">七、实验材料</h2>
+<p>以下为4篇实验文章的完整材料，包括每篇文章的评论内容和测试题目。</p>
+
+
+    <div class="article-section" id="article-A02">
+        <h2>文章1：人民网痛批：沉睡中的大学生，你不失业，天理难容！</h2>
+        <div class="article-meta">
+            <span class="meta-tag">编号：A02</span>
+            <span class="meta-tag">正文约 2704 字</span>
+            <span class="meta-tag">评论 10 条</span>
+            <span class="meta-tag">题目 10 道</span>
+        </div>
+
+        <h3>评论内容（10条）</h3>
+        <div class="comments-list">
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C01</span>
+                <span class="comment-stats">👍 356 · 💬 42</span>
+            </div>
+            <div class="comment-text">课堂状态确实令人担忧，但把责任完全推给学生也有失公允。很多大学课程内容陈旧、教学方式单一，老师照本宣科，学生自然难以集中注意力。改善课堂质量需要师生双方共同努力，而不是单方面指责。</div>
+            <div class="comment-anchor">关联句子：“上课时清醒没有发呆的多，发呆没有睡觉的多，睡觉没有玩手机的多”</div>
+        </div>
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C02</span>
+                <span class="comment-stats">👍 289 · 💬 31</span>
+            </div>
+            <div class="comment-text">这种应试式学习的后果是知识无法内化为能力。学生习惯了划重点、背答案，缺乏独立思考和主动探究的训练。等到进入职场需要解决实际问题时，才发现之前学的东西几乎用不上，这才是最值得反思的地方。</div>
+            <div class="comment-anchor">关联句子：“考试时不给范围就不会考试，给了范围也只是复印同学准备的答案”</div>
+        </div>
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C03</span>
+                <span class="comment-stats">👍 412 · 💬 56</span>
+            </div>
+            <div class="comment-text">课程考核与实际能力脱节是普遍现象。考试分数高不代表技能掌握扎实，很多学生为了绩点而学习，而非为了掌握技能。用人单位越来越看重实际操作能力，学历和分数的含金量正在被重新审视。</div>
+            <div class="comment-anchor">关联句子：“你说，你修完了《计算机基础》，但真实水平却连个PPT都做不好”</div>
+        </div>
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C04</span>
+                <span class="comment-stats">👍 378 · 💬 38</span>
+            </div>
+            <div class="comment-text">中国英语教育长期偏重应试，忽视了实际交流能力的培养。学生花大量时间背单词、做阅读，却很少有口语练习的机会。语言的本质是沟通工具，如果学了十几年仍然无法开口交流，教育方式确实需要改革。</div>
+            <div class="comment-anchor">关联句子：“你说，你修了两年英语，然而，你的水平却连与外国人日常对话都打怵”</div>
+        </div>
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C05</span>
+                <span class="comment-stats">👍 245 · 💬 29</span>
+            </div>
+            <div class="comment-text">实习造假背后反映的是学生对职业规划的漠视和对父母的过度依赖。很多人直到毕业都没有认真思考过自己想做什么、能做什么，把找工作这件人生大事也当成了可以靠关系解决的问题，这种心态才是最危险的。</div>
+            <div class="comment-anchor">关联句子：“实习要让父母开假证明，评先进要让父母找关系，补办证书要父母跑学校”</div>
+        </div>
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C06</span>
+                <span class="comment-stats">👍 198 · 💬 67</span>
+            </div>
+            <div class="comment-text">适度的娱乐本无可厚非，但把绝大部分课余时间投入游戏，本质上是用短期满足替代长期投资。游戏中的成就感来得快、去得也快，而技能和知识的积累需要长期坚持。毕业时两者的差距会清晰地显现出来。</div>
+            <div class="comment-anchor">关联句子：“唯一投入的是游戏，耗时最多的是游戏，而你的自荐信对此又只字不提”</div>
+        </div>
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C07</span>
+                <span class="comment-stats">👍 312 · 💬 24</span>
+            </div>
+            <div class="comment-text">自我管理能力的退化比知识匮乏更值得警惕。一个人如果连基本的作息、运动和学习习惯都无法维持，进入职场后很难适应工作节奏和压力。大学不仅是学知识的地方，更是学会独立生活和自我约束的阶段。</div>
+            <div class="comment-anchor">关联句子：“图书馆里没有你的人影，运动场上没有你的人影，公益场上更没有你的人影”</div>
+        </div>
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C08</span>
+                <span class="comment-stats">👍 421 · 💬 35</span>
+            </div>
+            <div class="comment-text">在就业市场上，真正的竞争力来自于差异化能力。当所有人都拥有相似的学历和证书时，那些具备某项突出技能、丰富实践经验或优秀综合素质的人才能脱颖而出。与其泛泛而学，不如找到自己的长板并深耕。</div>
+            <div class="comment-anchor">关联句子：“找工作时，在工作岗位上的最大价值在于不可替代”</div>
+        </div>
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C09</span>
+                <span class="comment-stats">👍 567 · 💬 48</span>
+            </div>
+            <div class="comment-text">短期来看，持续努力的人可能并不比投机取巧者表现更好，但时间会放大两者的差距。那些在大学期间坚持学习、积累的人，往往在毕业后的职业发展中展现出更强的后劲。延迟满足的能力，是区分长期成功者的重要标志。</div>
+            <div class="comment-anchor">关联句子：“从刚踏入校园的那一刻开始，她就和图书馆紧密相连”</div>
+        </div>
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C10</span>
+                <span class="comment-stats">👍 389 · 💬 27</span>
+            </div>
+            <div class="comment-text">大学时期的付出和回报之间存在时间差，这导致很多人低估了当下努力的价值。但从更长的时间维度看，知识、技能和习惯的积累具有复利效应，早期的投入会在未来以更高的回报率兑现。与其在毕业后焦虑，不如在在校期间行动。</div>
+            <div class="comment-anchor">关联句子：“熬过的辛苦最后都换成了幸福”</div>
+        </div></div>
+
+        <h3>测试题目</h3>
+        
+        <div class="question-group">
+            <h4>评论识别 (CRA)（4题）</h4>
+            
+            <div class="question-item">
+                <div class="question-id">R1</div>
+                <div class="question-prompt">有评论认为，课程考核与实际能力脱节是普遍现象，考试分数高并不代表技能掌握扎实，很多学生为了绩点而学习而非为了掌握技能。</div>
+                <div class="options"><div class="option correct"><span class="option-key">A</span> 出现过</div><div class="option "><span class="option-key">B</span> 未出现过</div></div>
+                <div class="answer-label">正确答案：<strong>A</strong></div>
+            </div>
+            <div class="question-item">
+                <div class="question-id">R2</div>
+                <div class="question-prompt">有评论指出，大学生就业困难的根本原因是高校连年扩招导致学历严重贬值，用人单位不得不不断提高招聘门槛来筛选候选人。</div>
+                <div class="options"><div class="option "><span class="option-key">A</span> 出现过</div><div class="option correct"><span class="option-key">B</span> 未出现过</div></div>
+                <div class="answer-label">正确答案：<strong>B</strong></div>
+            </div>
+            <div class="question-item">
+                <div class="question-id">R3</div>
+                <div class="question-prompt">有评论提出，把绝大部分课余时间投入游戏，本质上是用短期满足替代长期投资，游戏中的成就感来得快去得也快，而技能积累需要长期坚持。</div>
+                <div class="options"><div class="option correct"><span class="option-key">A</span> 出现过</div><div class="option "><span class="option-key">B</span> 未出现过</div></div>
+                <div class="answer-label">正确答案：<strong>A</strong></div>
+            </div>
+            <div class="question-item">
+                <div class="question-id">R4</div>
+                <div class="question-prompt">有评论建议，大学应该全面取消传统的期末考试制度，改用完全的项目制学习方式来评估学生的真实能力和综合素质。</div>
+                <div class="options"><div class="option "><span class="option-key">A</span> 出现过</div><div class="option correct"><span class="option-key">B</span> 未出现过</div></div>
+                <div class="answer-label">正确答案：<strong>B</strong></div>
+            </div>
+        </div>
+        <div class="question-group">
+            <h4>文章理解 (ACA)（2题）</h4>
+            
+            <div class="question-item">
+                <div class="question-id">Q1</div>
+                <div class="question-prompt">根据正文，作者主要把大学生就业困难归因于什么？</div>
+                <div class="options"><div class="option correct"><span class="option-key">A</span> 长期缺少实践、能力训练和自我管理，同时把大量时间用于消遣和娱乐。</div><div class="option "><span class="option-key">B</span> 大学校园数量太少，导致学生无法获得学位。</div><div class="option "><span class="option-key">C</span> 企业普遍只招聘有海外经历的毕业生。</div><div class="option "><span class="option-key">D</span> 大学生掌握的专业知识普遍超过岗位要求。</div></div>
+                <div class="answer-label">正确答案：<strong>A</strong></div>
+            </div>
+            <div class="question-item">
+                <div class="question-id">Q2</div>
+                <div class="question-prompt">关于L同学的经历，正文强调了哪一点？</div>
+                <div class="options"><div class="option correct"><span class="option-key">A</span> 她从入学起持续去教室前排和图书馆，选择先投入技能训练而非玩耍。</div><div class="option "><span class="option-key">B</span> 她依靠父母关系获得了更高的考试成绩和特殊待遇。</div><div class="option "><span class="option-key">C</span> 她几乎不参加学习活动，只专注于恋爱和社团活动。</div><div class="option "><span class="option-key">D</span> 她因为每门考试都明显高于同学而受到大家的追捧。</div></div>
+                <div class="answer-label">正确答案：<strong>A</strong></div>
+            </div>
+        </div>
+        <div class="question-group">
+            <h4>评论理解 (CTIA)（2题）</h4>
+            
+            <div class="question-item">
+                <div class="question-id">Q3</div>
+                <div class="question-prompt">评论C03&quot;课程考核与实际能力脱节是普遍现象，考试分数高不代表技能掌握扎实，很多学生为了绩点而学习而非为了掌握技能&quot;主要对应正文中的哪一项内容？</div>
+                <div class="options"><div class="option correct"><span class="option-key">A</span> 修完《计算机基础》，但真实水平却连个PPT都做不好。</div><div class="option "><span class="option-key">B</span> 大学生在军训时学习过叠被子。</div><div class="option "><span class="option-key">C</span> 学生毕业前不知道自己的兴趣特长。</div><div class="option "><span class="option-key">D</span> 学生应该把时间留给靠谱的人和事。</div></div>
+                <div class="answer-label">正确答案：<strong>A</strong></div>
+            </div>
+            <div class="question-item">
+                <div class="question-id">Q4</div>
+                <div class="question-prompt">评论C06&quot;把绝大部分课余时间投入游戏，本质上是用短期满足替代长期投资，游戏中的成就感来得快去得也快&quot;与正文哪处内容直接相关？</div>
+                <div class="options"><div class="option correct"><span class="option-key">A</span> 唯一投入的是游戏，耗时最多的是游戏，而自荐信对此又只字不提。</div><div class="option "><span class="option-key">B</span> 上课时清醒没有发呆的多，发呆没有睡觉的多。</div><div class="option "><span class="option-key">C</span> L同学从刚踏入校园就和图书馆紧密相连。</div><div class="option "><span class="option-key">D</span> 找工作时最大价值在于不可替代。</div></div>
+                <div class="answer-label">正确答案：<strong>A</strong></div>
+            </div>
+        </div>
+        <div class="question-group">
+            <h4>信息定位（2题）</h4>
+            
+            <div class="question-item">
+                <div class="question-id">Q5</div>
+                <div class="question-prompt">请在评论中找到表达&quot;英语教育长期偏重应试、忽视实际交流能力培养，学生花大量时间背单词做阅读却很少有口语练习，学了十几年仍无法开口交流&quot;这一观点的评论。它是哪一条？</div>
+                <div class="options"><div class="option "><span class="option-key">A</span> 应试式学习导致知识无法内化为能力，学生习惯划重点背答案，缺乏独立思考训练，进入职场才发现学的东西几乎用不上。</div><div class="option correct"><span class="option-key">B</span> 英语教育长期偏重应试忽视实际交流能力培养，学生很少有口语练习机会，学了十几年仍无法开口交流，教育方式需要改革。</div><div class="option "><span class="option-key">C</span> 自我管理能力退化比知识匮乏更值得警惕，连基本作息、运动和学习习惯都无法维持，进入职场后很难适应工作节奏和压力。</div><div class="option "><span class="option-key">D</span> 大学付出与回报存在时间差导致很多人低估当下努力价值，但知识技能和习惯积累有复利效应，早期投入未来会以更高回报率兑现。</div></div>
+                <div class="answer-label">正确答案：<strong>B</strong></div>
+            </div>
+            <div class="question-item">
+                <div class="question-id">Q6</div>
+                <div class="question-prompt">有评论指出「大学期间坚持学习、积累的人，往往在毕业后的职业发展中展现出更强的后劲，延迟满足的能力是区分长期成功者的重要标志」主要对应正文中的哪一处？</div>
+                <div class="options"><div class="option correct"><span class="option-key">A</span> “从刚踏入校园的那一刻开始，她就和图书馆紧密相连。”</div><div class="option "><span class="option-key">B</span> “考试时不给范围就不会考试，给了范围也只是复印同学准备的答案。”</div><div class="option "><span class="option-key">C</span> “军训的时候叠过被子，军训过后还叠过几次？”</div><div class="option "><span class="option-key">D</span> “找工作时，在工作岗位上的最大价值在于不可替代。”</div></div>
+                <div class="answer-label">正确答案：<strong>A</strong></div>
+            </div>
+        </div>
+    </div>
+    <div class="article-section" id="article-A03">
+        <h2>文章2：港媒痛批李嘉诚：卖港口给美国、背叛全体国人，官方罕见转帖认同</h2>
+        <div class="article-meta">
+            <span class="meta-tag">编号：A03</span>
+            <span class="meta-tag">正文约 2459 字</span>
+            <span class="meta-tag">评论 10 条</span>
+            <span class="meta-tag">题目 10 道</span>
+        </div>
+
+        <h3>评论内容（10条）</h3>
+        <div class="comments-list">
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C01</span>
+                <span class="comment-stats">👍 423 · 💬 67</span>
+            </div>
+            <div class="comment-text">43个港口的交易规模本身就足以引起关注，更何况交易对象是美国资本。港口作为基础设施具有战略属性，其所有权变更不应仅以商业逻辑衡量。在当前国际形势下，这类资产的流向值得公众和监管层面认真审视。</div>
+            <div class="comment-anchor">关联句子：“把旗下长江和记实业公司（长和）所控制的全球43个港口，一夜之间全部卖给了美国贝莱德集团”</div>
+        </div>
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C02</span>
+                <span class="comment-stats">👍 567 · 💬 89</span>
+            </div>
+            <div class="comment-text">在中美战略竞争加剧的背景下，将关键港口资产出售给美国企业，其影响已经超出了普通商业交易的范畴。企业当然有经营自主权，但当决策涉及国家战略利益时，企业家的站位和判断理应受到公众的关注和讨论。</div>
+            <div class="comment-anchor">关联句子：“当下中美竞争到了水深火热、你死我活的阶段”</div>
+        </div>
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C03</span>
+                <span class="comment-stats">👍 389 · 💬 45</span>
+            </div>
+            <div class="comment-text">巴拿马运河两端港口的战略价值不言而喻，它们直接影响着中国与拉美、加勒比地区的贸易通道安全。将这类咽喉要道的控制权交到美国企业手中，对中国的海上贸易安全构成了潜在风险，这一点不容忽视。</div>
+            <div class="comment-anchor">关联句子：“巴拿马运河两端的两个港口”</div>
+        </div>
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C04</span>
+                <span class="comment-stats">👍 456 · 💬 52</span>
+            </div>
+            <div class="comment-text">这组数据揭示了交易的实际影响：全球6%的海运贸易经巴拿马运河通行，而中国占其中的五分之一以上。这意味着中国相当规模的对外贸易物流通道的控制权发生了转移，其长期影响需要审慎评估。</div>
+            <div class="comment-anchor">关联句子：“全球超过6%的海运贸易，都要经此通行。而单单我们中国，在这6%中，就占了21%的份量”</div>
+        </div>
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C05</span>
+                <span class="comment-stats">👍 512 · 💬 73</span>
+            </div>
+            <div class="comment-text">特朗普政府多次公开表达对巴拿马运河的战略意图，而恰在此时完成港口出售，时间上的高度重合难以用巧合解释。在大国博弈的背景下，商业决策与政治动向之间的关联需要被认真追问，而非简单回避。</div>
+            <div class="comment-anchor">关联句子：“美国总统特朗普上台后，多次宣称要“收回”巴拿马运河”</div>
+        </div>
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C06</span>
+                <span class="comment-stats">👍 478 · 💬 61</span>
+            </div>
+            <div class="comment-text">将涉及战略枢纽的资产交易定性为单纯商业行为，缺乏说服力。这类交易的规模、敏感性和时机选择，都决定了它必然带有地缘政治维度。公众有权利了解交易背后的完整逻辑和决策过程。</div>
+            <div class="comment-anchor">关联句子：“李嘉诚说卖就卖了，难道只是时间上的巧合？只是单纯的商业行为？”</div>
+        </div>
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C07</span>
+                <span class="comment-stats">👍 398 · 💬 34</span>
+            </div>
+            <div class="comment-text">官方媒体用'并非普通商业行为'来定性，措辞已经相当明确。这一定性意味着交易的影响被提升到了国家战略层面来审视，也为后续的舆论讨论和政策回应定下了基调。</div>
+            <div class="comment-anchor">关联句子：“并非“普通商业行为”是作者的原话”</div>
+        </div>
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C08</span>
+                <span class="comment-stats">👍 623 · 💬 95</span>
+            </div>
+            <div class="comment-text">贝莱德CEO与特朗普的密切关系以及收购过程中的多次汇报，为'美国政府深度介入'这一判断提供了有力佐证。当资本与政治深度绑定时，所谓的市场行为就不再是纯粹的经济决策，而是大国博弈的组成部分。</div>
+            <div class="comment-anchor">关联句子：“贝莱德集团CEO芬克与特朗普私交甚笃，在收购长和海外港口之前，他多次向特朗普汇报进展”</div>
+        </div>
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C09</span>
+                <span class="comment-stats">👍 734 · 💬 112</span>
+            </div>
+            <div class="comment-text">网友用'没有腰骨的跪低''唯利是图'来表达不满，虽然情绪色彩浓厚，但核心关切是合理的：企业家在追求商业利益的同时，是否应当承担相应的社会责任和国家大义？这个问题值得所有中国企业深思。</div>
+            <div class="comment-anchor">关联句子：“没有腰骨的跪低，是唯利是图、见利忘义，漠视国家利益、民族大义，背叛和出卖全体中国人”</div>
+        </div>
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C10</span>
+                <span class="comment-stats">👍 445 · 💬 38</span>
+            </div>
+            <div class="comment-text">港澳办转发锐评释放的信号非常清晰，代表了官方层面对此事的态度。这对其他中国企业也是一个警示：在民族复兴的关键阶段，企业的战略决策不能只算经济账，还要算政治账和长远账。</div>
+            <div class="comment-anchor">关联句子：“国家港澳办在其官网“涉港澳资讯”栏目中，直接转发了《大公报》这篇锐评”</div>
+        </div></div>
+
+        <h3>测试题目</h3>
+        
+        <div class="question-group">
+            <h4>评论识别 (CRA)（4题）</h4>
+            
+            <div class="question-item">
+                <div class="question-id">R1</div>
+                <div class="question-prompt">有评论分析，李嘉诚出售港口资产的主要原因是港口业务长期亏损、运营成本居高不下，需要及时剥离不良资产来回笼资金。</div>
+                <div class="options"><div class="option "><span class="option-key">A</span> 出现过</div><div class="option correct"><span class="option-key">B</span> 未出现过</div></div>
+                <div class="answer-label">正确答案：<strong>B</strong></div>
+            </div>
+            <div class="question-item">
+                <div class="question-id">R2</div>
+                <div class="question-prompt">有评论强调，巴拿马运河两端港口的战略价值不言而喻，它们直接影响着中国与拉美、加勒比地区的贸易通道安全。</div>
+                <div class="options"><div class="option correct"><span class="option-key">A</span> 出现过</div><div class="option "><span class="option-key">B</span> 未出现过</div></div>
+                <div class="answer-label">正确答案：<strong>A</strong></div>
+            </div>
+            <div class="question-item">
+                <div class="question-id">R3</div>
+                <div class="question-prompt">有评论透露，巴拿马政府已经明确表态，将在未来五年内逐步收回所有由外国企业控制的港口经营权，实现港口国有化。</div>
+                <div class="options"><div class="option "><span class="option-key">A</span> 出现过</div><div class="option correct"><span class="option-key">B</span> 未出现过</div></div>
+                <div class="answer-label">正确答案：<strong>B</strong></div>
+            </div>
+            <div class="question-item">
+                <div class="question-id">R4</div>
+                <div class="question-prompt">有评论指出，贝莱德CEO与特朗普的密切关系以及收购过程中的多次汇报，为「美国政府深度介入」这一判断提供了有力佐证。</div>
+                <div class="options"><div class="option correct"><span class="option-key">A</span> 出现过</div><div class="option "><span class="option-key">B</span> 未出现过</div></div>
+                <div class="answer-label">正确答案：<strong>A</strong></div>
+            </div>
+        </div>
+        <div class="question-group">
+            <h4>文章理解 (ACA)（2题）</h4>
+            
+            <div class="question-item">
+                <div class="question-id">Q1</div>
+                <div class="question-prompt">正文总结了公众关注港口出售事件的几个主要原因。下列哪项不属于正文提到的原因？</div>
+                <div class="options"><div class="option "><span class="option-key">A</span> 交易涉及巴拿马运河两端的港口及其航运枢纽意义。</div><div class="option "><span class="option-key">B</span> 当时中美竞争加剧，港口被视为战略资源。</div><div class="option "><span class="option-key">C</span> 美国曾表示要收回巴拿马运河，并谋划相关港口费用。</div><div class="option correct"><span class="option-key">D</span> 交易使李嘉诚立即获得了中国政府授予的新职务。</div></div>
+                <div class="answer-label">正确答案：<strong>D</strong></div>
+            </div>
+            <div class="question-item">
+                <div class="question-id">Q2</div>
+                <div class="question-prompt">根据正文，港澳办官网转载《大公报》锐评这一动作被作者如何解读？</div>
+                <div class="options"><div class="option correct"><span class="option-key">A</span> 被视为释放出对这件事的态度信号，表明官方立场。</div><div class="option "><span class="option-key">B</span> 被视为宣布所有港口交易立即作废。</div><div class="option "><span class="option-key">C</span> 被视为与港口出售完全无关的技术操作。</div><div class="option "><span class="option-key">D</span> 被视为作者撤回了此前对交易的批评。</div></div>
+                <div class="answer-label">正确答案：<strong>A</strong></div>
+            </div>
+        </div>
+        <div class="question-group">
+            <h4>评论理解 (CTIA)（2题）</h4>
+            
+            <div class="question-item">
+                <div class="question-id">Q3</div>
+                <div class="question-prompt">评论C04&quot;全球6%的海运贸易经巴拿马运河通行，中国占其中五分之一以上，这意味着中国相当规模的对外贸易物流通道控制权发生了转移&quot;主要对应正文中的哪一层信息？</div>
+                <div class="options"><div class="option correct"><span class="option-key">A</span> 巴拿马运河是贸易往来的核心要道，全球超过6%的海运贸易经此通行，中国占其中21%。</div><div class="option "><span class="option-key">B</span> 《大公报》锐评的作者姓名和文章字数。</div><div class="option "><span class="option-key">C</span> 作者对'汉奸'一词的主观评价。</div><div class="option "><span class="option-key">D</span> 港澳办官网转载文章的具体日期。</div></div>
+                <div class="answer-label">正确答案：<strong>A</strong></div>
+            </div>
+            <div class="question-item">
+                <div class="question-id">Q4</div>
+                <div class="question-prompt">评论C08&quot;贝莱德CEO与特朗普关系密切以及收购过程中多次汇报，为美国政府深度介入提供了有力佐证，当资本与政治深度绑定时市场行为就不再是纯粹经济决策&quot;与正文观点的关系是？</div>
+                <div class="options"><div class="option correct"><span class="option-key">A</span> 它引用了正文第一个论据，即贝莱德CEO与特朗普关系密切、多次汇报，说明交易受美国政府操纵。</div><div class="option "><span class="option-key">B</span> 它否认正文提到的中美竞争背景。</div><div class="option "><span class="option-key">C</span> 它补充了正文没有出现的港口售价信息。</div><div class="option "><span class="option-key">D</span> 它只讨论了文章的写作字数，没有涉及论点。</div></div>
+                <div class="answer-label">正确答案：<strong>A</strong></div>
+            </div>
+        </div>
+        <div class="question-group">
+            <h4>信息定位（2题）</h4>
+            
+            <div class="question-item">
+                <div class="question-id">Q5</div>
+                <div class="question-prompt">请在评论中找到表达&quot;特朗普政府多次公开表达对巴拿马运河的战略意图，而恰在此时完成港口出售，时间上的高度重合难以用巧合解释，商业决策与政治动向的关联需要被认真追问&quot;这一观点的评论。它是哪一条？</div>
+                <div class="options"><div class="option "><span class="option-key">A</span> 43个港口交易规模本身足以引起关注，港口作为基础设施具有战略属性，其所有权变更不应仅以商业逻辑衡量，资产流向值得公众和监管认真审视。</div><div class="option correct"><span class="option-key">B</span> 特朗普政府多次公开表达对巴拿马运河的战略意图，恰在此时完成港口出售，时间高度重合难以用巧合解释，商业决策与政治动向关联需认真追问。</div><div class="option "><span class="option-key">C</span> 贝莱德CEO与特朗普密切关系及收购中多次汇报，为美国政府深度介入提供有力佐证，资本与政治深度绑定时市场行为不再是纯粹经济决策。</div><div class="option "><span class="option-key">D</span> 港澳办转发锐评释放清晰信号代表官方态度，对其他中国企业也是警示：企业战略决策不能只算经济账，还要算政治账和长远账。</div></div>
+                <div class="answer-label">正确答案：<strong>B</strong></div>
+            </div>
+            <div class="question-item">
+                <div class="question-id">Q6</div>
+                <div class="question-prompt">有评论指出「网友用没有腰骨的跪低、唯利是图来表达不满，虽然情绪色彩浓厚但核心关切合理：企业家在追求商业利益的同时是否应当承担相应的社会责任和国家大义」主要对应正文中的哪一处？</div>
+                <div class="options"><div class="option correct"><span class="option-key">A</span> “认为这是没有腰骨的跪低，是唯利是图、见利忘义，漠视国家利益、民族大义，背叛和出卖全体中国人。”</div><div class="option "><span class="option-key">B</span> “全球超过6%的海运贸易，都要经此通行。”</div><div class="option "><span class="option-key">C</span> “当然，'汉奸'2字，是我给的主观评价。”</div><div class="option "><span class="option-key">D</span> “当前，世界百年变局加速演进……”</div></div>
+                <div class="answer-label">正确答案：<strong>A</strong></div>
+            </div>
+        </div>
+    </div>
+    <div class="article-section" id="article-A04">
+        <h2>文章3：如果明朝延续，没有清朝，现在的中国会怎么样？</h2>
+        <div class="article-meta">
+            <span class="meta-tag">编号：A04</span>
+            <span class="meta-tag">正文约 3434 字</span>
+            <span class="meta-tag">评论 10 条</span>
+            <span class="meta-tag">题目 10 道</span>
+        </div>
+
+        <h3>评论内容（10条）</h3>
+        <div class="comments-list">
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C01</span>
+                <span class="comment-stats">👍 467 · 💬 78</span>
+            </div>
+            <div class="comment-text">这个假设虽然大胆，但其推理链条有一定逻辑基础。明朝在对外交流、技术引进和制度弹性方面确实与清朝存在显著差异，如果这些特征延续到工业革命时代，中国的近代化路径可能会完全不同。当然，历史无法假设，这类讨论更多是为了反思清朝统治的特殊性。</div>
+            <div class="comment-anchor">关联句子：“如果明朝延续，没有清朝，现在的中国在国际上，上限美国，下限前苏联”</div>
+        </div>
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C02</span>
+                <span class="comment-stats">👍 534 · 💬 92</span>
+            </div>
+            <div class="comment-text">将清朝的问题归结为'异族政权'是一种简单化的判断。元朝同样由少数民族建立，但在文化政策和对外交流上更为开放。清朝的真正问题在于其统治逻辑——以少数族群的安全焦虑为出发点，将防汉置于国家发展之上，这才是其政策畸形的根源。</div>
+            <div class="comment-anchor">关联句子：“说清朝畸形，并不是因为他是异族建立的政权”</div>
+        </div>
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C03</span>
+                <span class="comment-stats">👍 389 · 💬 56</span>
+            </div>
+            <div class="comment-text">将百姓三餐改为两餐这一决策，暴露了清朝统治者在治理逻辑上的根本缺陷：他们不是从生产效率和民生福祉出发制定政策，而是出于族群比较的心理。农耕社会的百姓靠体力劳动生存，减少餐食直接影响劳动能力和健康水平，这种短视政策的代价最终由整个国家承担。</div>
+            <div class="comment-anchor">关联句子：“当皇帝没多久，就把百姓的一日三餐改成了两餐”</div>
+        </div>
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C04</span>
+                <span class="comment-stats">👍 678 · 💬 103</span>
+            </div>
+            <div class="comment-text">康熙在亲身体验了火器的战场威力后选择封存而非发展，这一决策的影响极为深远。它说明清朝统治者的首要关切不是国家的长远发展，而是维护自身统治的安全。为了防止汉人掌握先进技术而主动放弃军事现代化，这种因噎废食的选择，是清朝后来全面落后于世界的重要起点。</div>
+            <div class="comment-anchor">关联句子：“此战过后，直接将火器封存，不允许国内以后有火器出现”</div>
+        </div>
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C05</span>
+                <span class="comment-stats">👍 412 · 💬 67</span>
+            </div>
+            <div class="comment-text">清朝以鼎盛国力与准噶尔纠缠七十年才最终取胜，这本身就说明了放弃火器后的军事效率低下。更值得注意的是，即便在战争中暴露了火器缺失的严重后果，清朝统治者依然没有改变政策，这表明其防汉优先的统治逻辑已经根深蒂固，难以通过外部冲击来纠正。</div>
+            <div class="comment-anchor">关联句子：“疆域辽阔的大清用巅峰国力，竟然和一个面积不大的准噶尔汗国纠缠了70年之久”</div>
+        </div>
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C06</span>
+                <span class="comment-stats">👍 556 · 💬 71</span>
+            </div>
+            <div class="comment-text">鸦片战争中清军使用百年前的旧炮对抗英军现代化火炮的场景，是技术代差最直观的体现。但更深层的问题在于，清朝并非没有接触过先进火器，而是主动选择了放弃。这种由制度性排斥导致的落后，比单纯的技术落后更难弥补，因为它已经内化为统治集团的思维定式。</div>
+            <div class="comment-anchor">关联句子：“英国人的坚船利炮直接冲进了大清有国无防的海疆”</div>
+        </div>
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C07</span>
+                <span class="comment-stats">👍 623 · 💬 88</span>
+            </div>
+            <div class="comment-text">0.67%的识字率是一个令人震惊的数据，它意味着清末绝大多数百姓处于文盲状态。清朝将教育资源极度压缩并限定为八股取士，本质上是一种制度化的愚民政策。一个民众普遍缺乏基本读写能力的国家，不可能产生工业化所需的劳动力，也不可能形成推动社会进步的民间力量。</div>
+            <div class="comment-anchor">关联句子：“到了1908年，全国百姓的识字率仅仅只有0.67%”</div>
+        </div>
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C08</span>
+                <span class="comment-stats">👍 489 · 💬 64</span>
+            </div>
+            <div class="comment-text">区分明朝海禁与清朝闭关锁国是一个重要的学术澄清。明朝的海禁主要针对民间私人出海，官方层面的对外交流、朝贡贸易和技术引进从未中断。而清朝的闭关锁国是全方位的自我封闭，不仅限制人员往来，更阻断了信息和技术的流入，两者在性质和后果上完全不同。</div>
+            <div class="comment-anchor">关联句子：“闭关锁国没有，海禁不是闭关锁国”</div>
+        </div>
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C09</span>
+                <span class="comment-stats">👍 567 · 💬 59</span>
+            </div>
+            <div class="comment-text">郑和下西洋的规模和技术水平在当时世界上无出其右，这证明明朝具备发展海洋文明的能力和意愿。如果这种航海传统得以延续，中国在大航海时代完全有可能占据主动地位。清朝放弃海洋战略，不仅丧失了贸易优势，更错过了与世界同步发展的历史机遇。</div>
+            <div class="comment-anchor">关联句子：“郑和七下西洋，是世界上最大的国家航海行动”</div>
+        </div>
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C10</span>
+                <span class="comment-stats">👍 712 · 💬 96</span>
+            </div>
+            <div class="comment-text">'天子守国门，君王死社稷'所体现的政治气节，确实是明朝区别于清朝的重要特征。崇祯在绝境中选择自缢而非南迁或求和，这种刚烈的政治文化如果延续到近代，面对列强侵略时的应对方式可能会截然不同。当然，气节不能替代实力，但它决定了一个民族在面对危机时的底线和韧性。</div>
+            <div class="comment-anchor">关联句子：“不割地、不赔款、不纳贡、不和亲，天子守国门，君王死社稷”</div>
+        </div></div>
+
+        <h3>测试题目</h3>
+        
+        <div class="question-group">
+            <h4>评论识别 (CRA)（4题）</h4>
+            
+            <div class="question-item">
+                <div class="question-id">R1</div>
+                <div class="question-prompt">有评论认为，康熙在亲身体验了火器的战场威力后选择封存而非发展，说明清朝统治者的首要关切不是国家长远发展，而是维护自身统治安全。</div>
+                <div class="options"><div class="option correct"><span class="option-key">A</span> 出现过</div><div class="option "><span class="option-key">B</span> 未出现过</div></div>
+                <div class="answer-label">正确答案：<strong>A</strong></div>
+            </div>
+            <div class="question-item">
+                <div class="question-id">R2</div>
+                <div class="question-prompt">有评论断言，如果明朝得以延续而非被清朝取代，中国一定会主动发起工业革命，并在十九世纪之前成为世界第一经济强国。</div>
+                <div class="options"><div class="option "><span class="option-key">A</span> 出现过</div><div class="option correct"><span class="option-key">B</span> 未出现过</div></div>
+                <div class="answer-label">正确答案：<strong>B</strong></div>
+            </div>
+            <div class="question-item">
+                <div class="question-id">R3</div>
+                <div class="question-prompt">有评论解释，清朝实行闭关锁国政策完全是因为东南沿海倭寇骚扰频繁，出于国家安全考虑才限制对外贸易，与统治者的心态无关。</div>
+                <div class="options"><div class="option "><span class="option-key">A</span> 出现过</div><div class="option correct"><span class="option-key">B</span> 未出现过</div></div>
+                <div class="answer-label">正确答案：<strong>B</strong></div>
+            </div>
+            <div class="question-item">
+                <div class="question-id">R4</div>
+                <div class="question-prompt">有评论澄清，明朝的海禁主要针对民间私人出海，官方层面的对外交流、朝贡贸易和技术引进从未中断，这与清朝的全方位闭关锁国不同。</div>
+                <div class="options"><div class="option correct"><span class="option-key">A</span> 出现过</div><div class="option "><span class="option-key">B</span> 未出现过</div></div>
+                <div class="answer-label">正确答案：<strong>A</strong></div>
+            </div>
+        </div>
+        <div class="question-group">
+            <h4>文章理解 (ACA)（2题）</h4>
+            
+            <div class="question-item">
+                <div class="question-id">Q1</div>
+                <div class="question-prompt">根据正文，作者认为清朝'畸形'的主要表现之一是什么？</div>
+                <div class="options"><div class="option correct"><span class="option-key">A</span> 统治者为了维持自身控制，忽视火器发展、教育普及和对外交流等长期问题。</div><div class="option "><span class="option-key">B</span> 清朝完全没有建立任何行政制度。</div><div class="option "><span class="option-key">C</span> 清朝从未与其他国家发生过战争。</div><div class="option "><span class="option-key">D</span> 清朝的全部政策都直接复制了明朝。</div></div>
+                <div class="answer-label">正确答案：<strong>A</strong></div>
+            </div>
+            <div class="question-item">
+                <div class="question-id">Q2</div>
+                <div class="question-prompt">正文如何区分明朝海禁和清朝闭关锁国？</div>
+                <div class="options"><div class="option correct"><span class="option-key">A</span> 明朝限制百姓出海但没有完全切断对外联系，清朝则被描述为更彻底地与世隔绝。</div><div class="option "><span class="option-key">B</span> 明朝禁止所有外国人进入，清朝鼓励所有人出海。</div><div class="option "><span class="option-key">C</span> 两者在正文中被认为完全没有差异。</div><div class="option "><span class="option-key">D</span> 明朝只发展火器，清朝只发展农业。</div></div>
+                <div class="answer-label">正确答案：<strong>A</strong></div>
+            </div>
+        </div>
+        <div class="question-group">
+            <h4>评论理解 (CTIA)（2题）</h4>
+            
+            <div class="question-item">
+                <div class="question-id">Q3</div>
+                <div class="question-prompt">评论C04&quot;康熙亲身体验火器的战场威力后选择封存而非发展，为了防止汉人掌握先进技术而主动放弃军事现代化，这种因噎废食的选择是清朝后来全面落后于世界的重要起点&quot;主要对应正文中的哪一层论述？</div>
+                <div class="options"><div class="option correct"><span class="option-key">A</span> 康熙在认识到火器威力后，仍因担心汉人利用而将火器封存，不允许国内以后有火器出现。</div><div class="option "><span class="option-key">B</span> 清朝把一乡设置一所学校并只学习八股文。</div><div class="option "><span class="option-key">C</span> 明朝后期引进土豆等高产农作物。</div><div class="option "><span class="option-key">D</span> 明末崇祯拒绝以割地称王作为谈判条件。</div></div>
+                <div class="answer-label">正确答案：<strong>A</strong></div>
+            </div>
+            <div class="question-item">
+                <div class="question-id">Q4</div>
+                <div class="question-prompt">评论C07&quot;0.67%的识字率意味着清末绝大多数百姓处于文盲状态，清朝将教育资源极度压缩并限定为八股取士，本质上是一种制度化的愚民政策&quot;最准确地对应了正文中的哪项内容？</div>
+                <div class="options"><div class="option correct"><span class="option-key">A</span> 清朝将教育改为一乡一所、只能学八股文，到1908年全国百姓识字率仅0.67%。</div><div class="option "><span class="option-key">B</span> 康熙把百姓的一日三餐改成了两餐。</div><div class="option "><span class="option-key">C</span> 明朝郑和七下西洋，是世界上最大的国家航海行动。</div><div class="option "><span class="option-key">D</span> 清朝与准噶尔汗国纠缠了70年之久。</div></div>
+                <div class="answer-label">正确答案：<strong>A</strong></div>
+            </div>
+        </div>
+        <div class="question-group">
+            <h4>信息定位（2题）</h4>
+            
+            <div class="question-item">
+                <div class="question-id">Q5</div>
+                <div class="question-prompt">请在评论中找到表达&quot;明朝海禁主要针对民间私人出海，官方层面的对外交流、朝贡贸易和技术引进从未中断；而清朝闭关锁国是全方位的自我封闭，不仅限制人员往来更阻断了信息和技术流入，两者在性质和后果上完全不同&quot;这一观点的评论。它是哪一条？</div>
+                <div class="options"><div class="option "><span class="option-key">A</span> 将百姓三餐改为两餐暴露清朝统治者治理逻辑的根本缺陷，不是从生产效率和民生福祉出发而是出于族群比较心理，短视政策代价最终由整个国家承担。</div><div class="option "><span class="option-key">B</span> 鸦片战争中清军用百年前旧炮对抗英军现代化火炮，清朝并非没有接触过先进火器而是主动选择放弃，这种制度性排斥导致的落后比单纯技术落后更难弥补。</div><div class="option correct"><span class="option-key">C</span> 明朝海禁主要针对民间私人出海，官方对外交流、朝贡贸易和技术引进从未中断；清朝闭关锁国是全方位自我封闭，阻断信息和技术流入，两者性质和后果完全不同。</div><div class="option "><span class="option-key">D</span> 崇祯在绝境中选择自缢而非南迁或求和，这种刚烈的政治文化如果延续到近代，面对列强侵略时的应对方式可能会截然不同，气节决定了民族面对危机时的底线和韧性。</div></div>
+                <div class="answer-label">正确答案：<strong>C</strong></div>
+            </div>
+            <div class="question-item">
+                <div class="question-id">Q6</div>
+                <div class="question-prompt">有评论指出「郑和下西洋的规模和技术水平在当时世界上无出其右，证明明朝具备发展海洋文明的能力和意愿，如果这种航海传统得以延续中国在大航海时代完全有可能占据主动地位」主要对应正文中的哪一处？</div>
+                <div class="options"><div class="option correct"><span class="option-key">A</span> “郑和七下西洋，是世界上最大的国家航海行动，走到哪，打到哪，生意就做到哪。”</div><div class="option "><span class="option-key">B</span> “康熙首先考虑到拉开八旗兵和汉人的差距。”</div><div class="option "><span class="option-key">C</span> “清朝却反其道而行，让百姓都成了目不识丁的奴隶。”</div><div class="option "><span class="option-key">D</span> “英国人的坚船利炮直接冲进了大清有国无防的海疆。”</div></div>
+                <div class="answer-label">正确答案：<strong>A</strong></div>
+            </div>
+        </div>
+    </div>
+    <div class="article-section" id="article-A07">
+        <h2>文章4：唐朝289年、明朝276年、清朝268年，为何古代王朝难破300年大关</h2>
+        <div class="article-meta">
+            <span class="meta-tag">编号：A07</span>
+            <span class="meta-tag">正文约 2226 字</span>
+            <span class="meta-tag">评论 10 条</span>
+            <span class="meta-tag">题目 10 道</span>
+        </div>
+
+        <h3>评论内容（10条）</h3>
+        <div class="comments-list">
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C01</span>
+                <span class="comment-stats">👍 345 · 💬 41</span>
+            </div>
+            <div class="comment-text">三个大一统王朝的国祚都集中在270至290年之间，这种高度趋同的现象不太可能是偶然。它暗示着中国古代帝制王朝可能存在某种系统性的生命周期，而非简单的兴衰循环。寻找这个周期背后的制度性原因，比单纯罗列史实更有价值。</div>
+            <div class="comment-anchor">关联句子：“唐朝289年，明朝276年、清朝268年，大一统王朝中就没有迈过300年大关的”</div>
+        </div>
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C02</span>
+                <span class="comment-stats">👍 412 · 💬 56</span>
+            </div>
+            <div class="comment-text">将汉朝和宋朝排除在'三百年王朝'之外是合理的。西汉与东汉之间有王莽新朝的断裂，北宋与南宋之间有靖康之变的政权重构，它们本质上是两个独立政权的叠加，而非一个连续王朝的延续。这种区分有助于更准确地认识古代王朝的实际寿命。</div>
+            <div class="comment-anchor">关联句子：“汉朝分西汉、东汉，宋朝分北宋、南宋，严格意义上来说，并没有迈过300年大关”</div>
+        </div>
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C03</span>
+                <span class="comment-stats">👍 478 · 💬 63</span>
+            </div>
+            <div class="comment-text">跳出土地兼并的传统框架，从帝制中央集权的制度本身来解释王朝寿命，是一个有启发性的视角。土地兼并确实是重要因素，但它更多是经济层面的表现；而中央集权制度如何影响权力结构、政治博弈和改朝换代的频率，可能是更深层的制度性原因。</div>
+            <div class="comment-anchor">关联句子：“今天宋安之不说土地矛盾的这个社会矛盾问题，而是以大历史来说说我们中国古代的帝制特色”</div>
+        </div>
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C04</span>
+                <span class="comment-stats">👍 534 · 💬 72</span>
+            </div>
+            <div class="comment-text">中央集权将国家命运系于皇帝一人的能力和品行之上，这是一种高风险的制度设计。遇到雄才大略的君主可以创造盛世，但平庸或昏庸的君主则可能将国家拖入危机。虽然历代都在完善制度以弥补皇帝个人能力的不足，但权力的高度集中始终意味着系统性风险无法被根本消除。</div>
+            <div class="comment-anchor">关联句子：“帝制的中央集权，说白了就是集权于皇帝一身”</div>
+        </div>
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C05</span>
+                <span class="comment-stats">👍 467 · 💬 58</span>
+            </div>
+            <div class="comment-text">明朝的内阁与司礼监相互制衡的制度设计，在当时确实具有相当的先进性。它在一定程度上实现了决策权与执行权的分离，即使皇帝长期不亲政，国家机器仍能正常运转。这种制度安排说明中国古代政治并非完全停滞，而是在不断探索权力运行的合理方式。</div>
+            <div class="comment-anchor">关联句子：“明朝的监、阁共理国政的制度”</div>
+        </div>
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C06</span>
+                <span class="comment-stats">👍 389 · 💬 47</span>
+            </div>
+            <div class="comment-text">中央集权制度下权力博弈的零和性质，是理解改朝换代频繁的关键。权臣一旦架空皇帝，就面临'不篡位则被清算'的死局，因为只要皇帝还在，就始终存在忠于皇权的势力可能反扑。这种你死我活的权力逻辑，使得温和的权力过渡几乎不可能实现。</div>
+            <div class="comment-anchor">关联句子：“封建王朝的皇帝一旦大权旁落，往往都会性命之忧，更是会被取而代之”</div>
+        </div>
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C07</span>
+                <span class="comment-stats">👍 423 · 💬 51</span>
+            </div>
+            <div class="comment-text">中国历史上改朝换代的频率远高于日本等国，根本原因在于制度逻辑的不同。在中央集权体制下，权臣没有'退一步'的空间，取代皇帝是唯一安全的选择；而在虚君体制下，权臣可以在保留象征性君主的前提下掌握实权，无需承担改朝换代的巨大风险和成本。</div>
+            <div class="comment-anchor">关联句子：“古代封建王朝因为帝制的中央集权式原因，皇帝被架空往往意味着改朝换代”</div>
+        </div>
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C08</span>
+                <span class="comment-stats">👍 356 · 💬 44</span>
+            </div>
+            <div class="comment-text">日本天皇'万世一系'的关键在于权力的分散化。当天皇不掌握实际权力时，他对任何掌权者都不构成威胁，反而可以作为合法性的象征被保留。这种制度安排虽然限制了天皇的能动性，但也避免了中国历史上那种周期性的政权颠覆，是两种不同政治逻辑的必然结果。</div>
+            <div class="comment-anchor">关联句子：“因为他的帝制并非是中央集权式的，或者说天皇没机会集权”</div>
+        </div>
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C09</span>
+                <span class="comment-stats">👍 412 · 💬 39</span>
+            </div>
+            <div class="comment-text">权力与责任的对等性是中央集权制度的内在逻辑。皇帝既然垄断了最高权力，就必须在国家危难时承担最终责任，这也是中国历史上'昏君误国'叙事的制度根源。相比之下，虚君制下的君主因为不掌握实权，自然也无需为政策失败负责，这是两种体制在政治风险分配上的根本差异。</div>
+            <div class="comment-anchor">关联句子：“中国古代的皇帝享受了大权在握，遇有危难之际自然要承担风险和民众对其的失望”</div>
+        </div>
+        <div class="comment-item">
+            <div class="comment-header">
+                <span class="comment-id">C10</span>
+                <span class="comment-stats">👍 298 · 💬 26</span>
+            </div>
+            <div class="comment-text">作者将自己的分析定位为'片面视角'而非唯一答案，这种学术态度值得肯定。历史现象的成因往往是多元的，土地兼并、气候变迁、制度设计等因素交织在一起，任何单一视角都无法完全解释王朝周期。但从中央集权制度本身出发的分析，确实为理解这一历史规律提供了有价值的新维度。</div>
+            <div class="comment-anchor">关联句子：“并非正确，只是以这种角度片面的说说，只是希望给大家提供一个全新的视角而已”</div>
+        </div></div>
+
+        <h3>测试题目</h3>
+        
+        <div class="question-group">
+            <h4>评论识别 (CRA)（4题）</h4>
+            
+            <div class="question-item">
+                <div class="question-id">R1</div>
+                <div class="question-prompt">有评论认为，古代王朝难以突破三百年的根本原因是周期性气候变化导致粮食减产，与政治制度设计没有直接关系。</div>
+                <div class="options"><div class="option "><span class="option-key">A</span> 出现过</div><div class="option correct"><span class="option-key">B</span> 未出现过</div></div>
+                <div class="answer-label">正确答案：<strong>B</strong></div>
+            </div>
+            <div class="question-item">
+                <div class="question-id">R2</div>
+                <div class="question-prompt">有评论提出，中央集权制度下权力博弈具有零和性质，权臣一旦架空皇帝就面临「不篡位则被清算」的死局，因为只要皇帝还在就始终存在反扑可能。</div>
+                <div class="options"><div class="option correct"><span class="option-key">A</span> 出现过</div><div class="option "><span class="option-key">B</span> 未出现过</div></div>
+                <div class="answer-label">正确答案：<strong>A</strong></div>
+            </div>
+            <div class="question-item">
+                <div class="question-id">R3</div>
+                <div class="question-prompt">有评论分析，日本天皇能够「万世一系」的关键在于权力的分散化，当天皇不掌握实际权力时，他对任何掌权者都不构成威胁，反而可以作为合法性象征被保留。</div>
+                <div class="options"><div class="option correct"><span class="option-key">A</span> 出现过</div><div class="option "><span class="option-key">B</span> 未出现过</div></div>
+                <div class="answer-label">正确答案：<strong>A</strong></div>
+            </div>
+            <div class="question-item">
+                <div class="question-id">R4</div>
+                <div class="question-prompt">有评论总结，只要皇帝足够勤政、每天坚持批阅奏章，中央集权制度就可以有效运转，王朝统治也能够永远维持下去而不会走向灭亡。</div>
+                <div class="options"><div class="option "><span class="option-key">A</span> 出现过</div><div class="option correct"><span class="option-key">B</span> 未出现过</div></div>
+                <div class="answer-label">正确答案：<strong>B</strong></div>
+            </div>
+        </div>
+        <div class="question-group">
+            <h4>文章理解 (ACA)（2题）</h4>
+            
+            <div class="question-item">
+                <div class="question-id">Q1</div>
+                <div class="question-prompt">正文为什么认为汉朝和宋朝严格意义上没有迈过三百年大关？</div>
+                <div class="options"><div class="option correct"><span class="option-key">A</span> 因为汉朝分为西汉、东汉，宋朝分为北宋、南宋，中间经历了政权断裂。</div><div class="option "><span class="option-key">B</span> 因为汉朝和宋朝都没有建立中央集权。</div><div class="option "><span class="option-key">C</span> 因为唐、明、清的统治年数都超过了三百年。</div><div class="option "><span class="option-key">D</span> 因为作者没有提供汉朝和宋朝的统治年数。</div></div>
+                <div class="answer-label">正确答案：<strong>A</strong></div>
+            </div>
+            <div class="question-item">
+                <div class="question-id">Q2</div>
+                <div class="question-prompt">本文主要选择从哪个角度解释古代大一统王朝难破三百年大关？</div>
+                <div class="options"><div class="option correct"><span class="option-key">A</span> 帝制的中央集权及其对皇帝、权臣和改朝换代的影响。</div><div class="option "><span class="option-key">B</span> 土地兼并的全部经济数据。</div><div class="option "><span class="option-key">C</span> 古代火器技术的传播速度。</div><div class="option "><span class="option-key">D</span> 近代欧洲工业化的军事优势。</div></div>
+                <div class="answer-label">正确答案：<strong>A</strong></div>
+            </div>
+        </div>
+        <div class="question-group">
+            <h4>评论理解 (CTIA)（2题）</h4>
+            
+            <div class="question-item">
+                <div class="question-id">Q3</div>
+                <div class="question-prompt">评论C04&quot;中央集权将国家命运系于皇帝一人的能力和品行之上，是一种高风险的制度设计，遇到雄才大略的君主可以创造盛世，但平庸或昏庸的君主则可能将国家拖入危机&quot;主要对应正文中的哪一处？</div>
+                <div class="options"><div class="option correct"><span class="option-key">A</span> 帝制中央集权的好处和坏处：皇帝能力强可以整合资源，能力不足或昏庸也会影响整个国家。</div><div class="option "><span class="option-key">B</span> 日本幕府更换三次而天皇仍保留。</div><div class="option "><span class="option-key">C</span> 汉朝和宋朝被分为前后两个阶段。</div><div class="option "><span class="option-key">D</span> 作者声明本文只是一个片面视角。</div></div>
+                <div class="answer-label">正确答案：<strong>A</strong></div>
+            </div>
+            <div class="question-item">
+                <div class="question-id">Q4</div>
+                <div class="question-prompt">评论C08&quot;日本天皇万世一系的关键在于权力的分散化，当天皇不掌握实际权力时对任何掌权者都不构成威胁，反而可以作为合法性的象征被保留&quot;主要对应正文中的哪项对比？</div>
+                <div class="options"><div class="option correct"><span class="option-key">A</span> 日本权力较为分散，傀儡天皇对权臣威胁较小，因此可能保持形式上的万世一系。</div><div class="option "><span class="option-key">B</span> 中国皇帝集权后可以最大限度开疆拓土。</div><div class="option "><span class="option-key">C</span> 明朝内阁和司礼监能够互相牵制。</div><div class="option "><span class="option-key">D</span> 中国皇帝在危难时要承担责任。</div></div>
+                <div class="answer-label">正确答案：<strong>A</strong></div>
+            </div>
+        </div>
+        <div class="question-group">
+            <h4>信息定位（2题）</h4>
+            
+            <div class="question-item">
+                <div class="question-id">Q5</div>
+                <div class="question-prompt">请在评论中找到表达&quot;明朝内阁与司礼监相互制衡的制度设计具有相当的先进性，在一定程度上实现了决策权与执行权的分离，即使皇帝长期不亲政国家机器仍能正常运转&quot;这一观点的评论。它是哪一条？</div>
+                <div class="options"><div class="option "><span class="option-key">A</span> 西汉与东汉之间有王莽新朝的断裂，北宋与南宋之间有靖康之变的政权重构，它们本质上是两个独立政权的叠加而非一个连续王朝的延续。</div><div class="option correct"><span class="option-key">B</span> 明朝内阁与司礼监相互制衡的制度设计具有相当先进性，实现了决策权与执行权的分离，即使皇帝长期不亲政国家机器仍能正常运转。</div><div class="option "><span class="option-key">C</span> 中国历史上改朝换代频率远高于日本等国，中央集权体制下权臣没有退一步的空间，取代皇帝是唯一安全的选择；虚君体制下权臣可保留象征性君主掌握实权。</div><div class="option "><span class="option-key">D</span> 作者将分析定位为片面视角而非唯一答案，历史现象成因多元，土地兼并、气候变迁、制度设计等因素交织，从中央集权制度出发的分析提供了有价值的新维度。</div></div>
+                <div class="answer-label">正确答案：<strong>B</strong></div>
+            </div>
+            <div class="question-item">
+                <div class="question-id">Q6</div>
+                <div class="question-prompt">有评论指出「权力与责任的对等性是中央集权制度的内在逻辑，皇帝既然垄断了最高权力就必须在国家危难时承担最终责任，这也是中国历史上昏君误国叙事的制度根源」主要对应正文中的哪一处？</div>
+                <div class="options"><div class="option correct"><span class="option-key">A</span> “中国古代的皇帝享受了大权在握，遇有危难之际自然要承担风险和民众对其的失望。”</div><div class="option "><span class="option-key">B</span> “汉朝405年，宋朝319年。”</div><div class="option "><span class="option-key">C</span> “中国古代的帝制是中央集权式的，越到后面中央集权越完善。”</div><div class="option "><span class="option-key">D</span> “下面的幕府换了三次。”</div></div>
+                <div class="answer-label">正确答案：<strong>A</strong></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>
