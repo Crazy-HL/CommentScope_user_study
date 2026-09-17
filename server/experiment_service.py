@@ -28,7 +28,8 @@ class ExperimentService:
         view = plan["participant_view"]
         for article in view["articles"]:
             persisted = by_order[article["article_order"]]
-            article["render_mode"] = OPAQUE_RENDER_MODES[persisted["condition"]]  # participant payload does not expose condition labels.
+            article["render_mode"] = OPAQUE_RENDER_MODES[persisted["condition"]]
+            article["condition"] = persisted["condition"]
         return {"session": session, "articles": view["articles"], "progress": {"responses": self.db.list_responses(session_id)}}
 
     def participant_payload(self, session_id):
