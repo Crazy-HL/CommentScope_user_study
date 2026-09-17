@@ -28,7 +28,7 @@ def validate_materials(materials):
                 if key not in comment or comment[key] in (None, ""):
                     errors.append(f"{article_id}/{comment.get('internal_id')}: missing {key}")
         groups = article.get("questions", {})
-        expected_counts = {"cra": 4, "aca": 2, "ctia": 2, "location": 2}
+        expected_counts = {"cra": 2, "aca": 2, "ctia": 2}
         for group, count in expected_counts.items():
             items = groups.get(group, [])
             if len(items) != count:

@@ -150,9 +150,9 @@ GROUP_ALLOCATIONS = {
 PARTICIPANTS = {
     f"P{i:02d}": f"G{((i - 1) // 6) + 1}" for i in range(1, 25)
 }
-STAGE_ORDER = ("instruction", "reading", "cra", "aca", "ctia", "location", "workload")
+STAGE_ORDER = ("instruction", "reading", "cra", "aca", "ctia", "workload")
 FINAL_STAGE_ORDER = ("preference", "interview", "complete")
-QUESTION_GROUP_ORDER = ("cra", "aca", "ctia", "location")
+QUESTION_GROUP_ORDER = ("cra", "aca", "ctia")
 
 
 def build_participant_plan(participant_id: str, materials=None) -> Dict:

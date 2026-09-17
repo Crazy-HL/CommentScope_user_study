@@ -26,12 +26,11 @@ export const PREFERENCE_OPTIONS = Object.freeze([
   { value: "BL", label: "界面 4（评论穿插在正文之间）" }
 ]);
 
-export const QUESTION_GROUPS = Object.freeze(["cra", "aca", "ctia", "location"]);
+export const QUESTION_GROUPS = Object.freeze(["cra", "aca", "ctia"]);
 export const NEXT_STAGE = Object.freeze({
   cra: "aca",
   aca: "ctia",
-  ctia: "location",
-  location: "workload"
+  ctia: "workload"
 });
 
 export const STAGE_TITLES = Object.freeze({

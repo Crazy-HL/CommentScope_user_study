@@ -30,6 +30,7 @@
         v-if="stage === 'instruction'"
         :article-order="activeArticleOrder"
         :loading="working"
+        :condition="currentArticle?.condition"
         @continue="beginReading"
       />
 

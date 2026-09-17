@@ -15,7 +15,6 @@
     <!-- 浮动答题按钮 -->
     <div v-if="currentQuestion && !showQuestionPanel" class="floating-answer-bar">
       <div class="answer-info">
-        <span class="answer-badge">{{ groupTitle }}</span>
         <span class="answer-progress">第 {{ currentIndex + 1 }} / {{ questions.length }} 题待作答</span>
       </div>
       <button type="button" class="answer-btn" @click="openQuestionPanel">
@@ -28,8 +27,10 @@
       <div v-if="showQuestionPanel && currentQuestion" class="question-overlay" @click.self="closeQuestionPanel">
         <div class="question-modal">
           <div class="question-modal-header">
-            <span class="question-group-tag">{{ groupTitle }}</span>
             <span class="question-count">第 {{ currentIndex + 1 }} 题，共 {{ questions.length }} 题</span>
+            <button type="button" class="return-article-btn" @click="closeQuestionPanel">
+              ← 返回文章
+            </button>
             <button type="button" class="close-btn" @click="closeQuestionPanel" aria-label="关闭">×</button>
           </div>
 
@@ -53,7 +54,7 @@
               </label>
               <p v-if="error" class="error" role="alert">{{ error }}</p>
               <div class="question-actions">
-                <button type="button" class="btn-secondary" @click="closeQuestionPanel">稍后再答</button>
+                <button type="button" class="btn-secondary" @click="closeQuestionPanel">返回文章</button>
                 <button type="submit" class="btn-primary" :disabled="!selectedOption || submitting">
                   {{ submitting ? "正在保存…" : "提交答案" }}
                 </button>
@@ -414,6 +415,21 @@ async function submit() {
   flex: 1;
   color: #526b82;
   font-size: 14px;
+}
+.return-article-btn {
+  padding: 6px 14px;
+  border: 1px solid #c9d6de;
+  border-radius: 6px;
+  color: #2b6e7c;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .2s, border-color .2s;
+}
+.return-article-btn:hover {
+  background: #f0f8f9;
+  border-color: #7fb5c0;
 }
 .close-btn {
   width: 32px;
