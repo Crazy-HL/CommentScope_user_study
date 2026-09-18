@@ -6,7 +6,7 @@
     </div>
 
     <div v-if="hasData" class="pie-chart-container">
-      <svg ref="chartSvg" class="pie-svg" viewBox="0 0 260 240" role="img" :aria-label="title">
+      <svg ref="chartSvg" class="pie-svg" viewBox="0 0 340 220" role="img" :aria-label="title">
         <g :transform="`translate(${centerX}, ${centerY})`">
           <path v-for="slice in visibleSlices" :key="slice.condition"
             :d="slice.path"
@@ -22,14 +22,15 @@
             font-size="11"
             font-weight="700">{{ formatPercent(slice.percent) }}</text>
         </g>
+        <!-- SVG 内部图例 -->
+        <g class="svg-legend">
+          <g v-for="(slice, index) in slices" :key="`svg-legend-${slice.condition}`" :transform="`translate(200, ${50 + index * 32})`">
+            <rect x="0" y="0" width="14" height="14" rx="2" :fill="slice.color" />
+            <text x="22" y="11" font-size="12" font-weight="600" fill="#17324d">{{ slice.condition }}</text>
+            <text x="50" y="11" font-size="12" fill="#526b82">{{ formatPercent(slice.percent) }}</text>
+          </g>
+        </g>
       </svg>
-      <div class="pie-legend">
-        <div v-for="slice in slices" :key="`legend-${slice.condition}`" class="pie-legend-item">
-          <span class="pie-legend-color" :style="{ background: slice.color }"></span>
-          <span class="pie-legend-label">{{ slice.condition }}</span>
-          <span class="pie-legend-value">{{ formatPercent(slice.percent) }}</span>
-        </div>
-      </div>
     </div>
     <div v-else class="academic-empty-state">暂无数据</div>
   </section>
@@ -48,9 +49,9 @@ const props = defineProps({
 const chartSvg = ref(null);
 const CONDITIONS = ["TE", "CS", "SE", "BL"];
 
-const centerX = 110;
-const centerY = 120;
-const radius = 95;
+const centerX = 100;
+const centerY = 110;
+const radius = 85;
 
 const hasData = computed(() => {
   return props.total > 0 && Object.values(props.data).some(v => (v?.count || 0) > 0);
@@ -107,8 +108,8 @@ function exportChart() {
   const url = URL.createObjectURL(svgBlob);
 
   img.onload = () => {
-    canvas.width = 520;
-    canvas.height = 480;
+    canvas.width = 680;
+    canvas.height = 440;
     ctx.fillStyle = "#fff";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(img, 10, 10, canvas.width - 20, canvas.height - 20);
@@ -124,12 +125,7 @@ function exportChart() {
 </script>
 
 <style scoped>
-.pie-chart-container { display: flex; align-items: center; gap: 8px; padding: 4px; }
-.pie-svg { flex-shrink: 0; width: 180px; height: auto; }
-.pie-legend { display: flex; flex-direction: column; gap: 6px; }
-.pie-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; }
-.pie-legend-color { width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; }
-.pie-legend-label { font-weight: 600; color: #17324d; min-width: 26px; }
-.pie-legend-value { color: #526b82; }
+.pie-chart-container { display: flex; align-items: center; padding: 4px; }
+.pie-svg { width: 100%; max-width: 340px; height: auto; }
 .academic-empty-state { padding: 30px; text-align: center; color: #8a9baa; font-size: 13px; }
 </style>
