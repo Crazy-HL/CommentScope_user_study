@@ -188,7 +188,7 @@
             <span class="admin-collapse-icon">{{ collapsedSections.preference ? "▶" : "▼" }}</span>
           </div>
           <div v-show="!collapsedSections.preference">
-            <div class="admin-metric-grid"><AdminAcademicMetricChart title="Preference Ranking · 平均排名" metric="Preference Ranking" :series="preferenceChartData.meanRank" :format="formatNumber" :higher-is-better="false" chart-type="horizontal-bar" :domain="[1, 4]" :ticks="[1, 2, 3, 4]" /><AdminAcademicMetricChart title="First-place Share · 第一名比例" metric="First-place Share" :series="preferenceChartData.firstPlaceShare" :format="formatAccuracy" :higher-is-better="true" chart-type="horizontal-bar" :domain="[0, 1]" :ticks="[0, 0.25, 0.5, 0.75, 1]" /></div>
+            <div class="admin-metric-grid"><AdminAcademicMetricChart title="Preference Ranking · 平均排名" metric="Preference Ranking" :series="preferenceChartData.meanRank" :format="formatNumber" :higher-is-better="false" chart-type="horizontal-bar" :domain="[1, 4]" :ticks="[1, 2, 3, 4]" /><AdminPieChart title="First-place Share · 第一名比例" :data="firstPlacePieData.data" :total="firstPlacePieData.total" /></div>
             <div class="admin-preference-grid"><article v-for="condition in conditions" :key="condition" class="admin-preference-card"><strong>{{ condition }}</strong><span>平均排名：{{ preferenceRank(condition) }}</span><span>第一名：{{ preference.rank_one?.[condition] || 0 }} 次</span><span>最后一名：{{ preference.rank_four?.[condition] || 0 }} 次</span></article></div>
             <p class="admin-muted">已提交偏好：{{ preference.submitted || 0 }}</p>
           </div>
@@ -246,6 +246,7 @@ import AdminAcademicMetricChart from "./AdminAcademicMetricChart.vue";
 import AdminAcademicOverallChart from "./AdminAcademicOverallChart.vue";
 import AdminAcademicTaskChart from "./AdminAcademicTaskChart.vue";
 import AdminAcademicSubjectiveChart from "./AdminAcademicSubjectiveChart.vue";
+import AdminPieChart from "./AdminPieChart.vue";
 import { DEMO_ACADEMIC_DATA, DEMO_ACADEMIC_METRICS, DEMO_PREFERENCE_DATA, buildAcademicDataFromSummary, buildMetricSeriesFromSummary, buildPreferenceSeriesFromSummary } from "../../admin/adminDemoData";
 import "./admin.css";
 import "./admin-dashboard.css";
@@ -346,6 +347,22 @@ const overviewCards = computed(() => [
 const analysisStatements = computed(() => analysis.value?.statements || []);
 const academicChartData = computed(() => showDemoData.value ? DEMO_ACADEMIC_DATA : buildAcademicDataFromSummary(summary.value));
 const preferenceChartData = computed(() => showDemoData.value ? DEMO_PREFERENCE_DATA : buildPreferenceSeriesFromSummary(summary.value));
+const firstPlacePieData = computed(() => {
+  if (showDemoData.value) {
+    const demoShares = [0.22, 0.18, 0.43, 0.10];
+    const total = 24;
+    const data = {};
+    conditions.forEach((cond, i) => { data[cond] = { count: Math.round(demoShares[i] * total) }; });
+    return { data, total };
+  }
+  const pref = summary.value?.preference || {};
+  const submitted = Number(pref.submitted || 0);
+  const data = {};
+  for (const cond of conditions) {
+    data[cond] = { count: Number(pref.rank_one?.[cond] || 0) };
+  }
+  return { data, total: submitted };
+});
 const subjectiveChartSeries = computed(() => Object.fromEntries(subjectiveMetrics.map(item => [item.name, academicMetricSeries(item.name)])));
 const continuityChartSeries = computed(() => Object.fromEntries(subjectiveMetrics.slice(0, 2).map(item => [item.name, academicMetricSeries(item.name)])));
 const qualityIssues = computed(() => quality.value?.issues || []);
