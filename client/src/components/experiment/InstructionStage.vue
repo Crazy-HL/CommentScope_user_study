@@ -154,12 +154,12 @@ p, li { line-height: 1.8; }
 
 /* 示意图通用样式 */
 .schematic { position: relative; margin-top: 10px; padding: 18px 16px 28px; background: #fff; border: 1px solid #e8eef2; border-radius: 8px; display: flex; gap: 12px; align-items: flex-start; }
-.schematic-article { flex: 1; display: flex; flex-direction: column; gap: 7px; }
-.schematic .line { height: 10px; background: #c8d3dc; border-radius: 3px; }
+.schematic-article { flex: 1; width: 100%; display: flex; flex-direction: column; gap: 7px; }
+.schematic .line { display: block; height: 10px; background: #c8d3dc; border-radius: 3px; flex-shrink: 0; }
 .schematic .line.full { width: 100%; }
 .schematic .line.med { width: 72%; }
 .schematic .line.short { width: 45%; }
-.schematic .comment-line { height: 10px; border-radius: 3px; }
+.schematic .comment-line { display: block; height: 10px; border-radius: 3px; flex-shrink: 0; }
 .schematic .comment-line.full { width: 100%; }
 .schematic .comment-line.med { width: 70%; }
 .schematic .comment-line.short { width: 50%; }
@@ -169,7 +169,7 @@ p, li { line-height: 1.8; }
 /* TE 文末集中 */
 .te-schematic { flex-direction: column; }
 .te-schematic .schematic-divider { height: 1px; background: #dde4ea; margin: 4px 0; }
-.te-schematic .schematic-comments { display: flex; flex-direction: column; gap: 7px; padding-top: 4px; }
+.te-schematic .schematic-comments { width: 100%; display: flex; flex-direction: column; gap: 7px; padding-top: 4px; }
 .te-schematic .comment-line { background: #2b7a78; }
 .te-schematic .comment-label { color: #2b7a78; }
 
