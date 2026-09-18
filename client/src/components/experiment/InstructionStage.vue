@@ -17,7 +17,7 @@
           <span class="condition-label">{{ conditionLabel }}</span>
           <span class="condition-desc">{{ conditionDesc }}</span>
 
-          <!-- TE: 文末集中 -->
+          <!-- TE: 文末嵌入 -->
           <div v-if="condition === 'TE'" class="schematic te-schematic">
             <div class="schematic-article">
               <div class="line full"></div>
@@ -28,13 +28,20 @@
             </div>
             <div class="schematic-divider"></div>
             <div class="schematic-comments">
-              <div class="comment-line full"></div>
-              <div class="comment-line med"></div>
-              <div class="comment-line full"></div>
-              <div class="comment-line short"></div>
+              <div class="comment-card">
+                <div class="comment-line full"></div>
+                <div class="comment-line med"></div>
+              </div>
+              <div class="comment-card">
+                <div class="comment-line full"></div>
+                <div class="comment-line short"></div>
+              </div>
+              <div class="comment-card">
+                <div class="comment-line med"></div>
+              </div>
             </div>
             <span class="schematic-label">正文</span>
-            <span class="schematic-label comment-label">评论区</span>
+            <span class="schematic-label comment-label">评论卡片</span>
           </div>
 
           <!-- CS: 点击查看 -->
@@ -130,7 +137,7 @@ const props = defineProps({
 defineEmits(["continue"]);
 
 const CONDITION_INFO = {
-  TE: { label: "文末集中 (Text-End)", desc: "所有评论集中显示在文章末尾，阅读完正文后可查看评论。", class: "te" },
+  TE: { label: "文末嵌入 (Text-End)", desc: "所有评论以卡片形式集中显示在文章末尾，阅读完正文后可查看评论。", class: "te" },
   CS: { label: "点击查看 (Click-to-Show)", desc: "正文中有评论的位置会显示标记，点击标记可在侧边栏查看评论。", class: "cs" },
   SE: { label: "句末跟随 (Sentence-End)", desc: "评论紧跟在相关句子的末尾，与正文连续显示。", class: "se" },
   BL: { label: "行间穿插 (Between-Line)", desc: "评论以独立段落的形式穿插在正文段落之间。", class: "bl" }
@@ -189,7 +196,8 @@ p, li { line-height: 1.8; }
 /* TE 文末集中 */
 .te-schematic { flex-direction: column; }
 .te-schematic .schematic-divider { height: 1px; background: #dde4ea; margin: 4px 0; }
-.te-schematic .schematic-comments { width: 100%; display: flex; flex-direction: column; gap: 7px; padding-top: 4px; }
+.te-schematic .schematic-comments { width: 100%; display: flex; flex-direction: column; gap: 8px; padding-top: 4px; }
+.te-schematic .comment-card { display: flex; flex-direction: column; gap: 5px; padding: 8px 10px; background: #fef0f0; border: 1px solid #f5c6c6; border-radius: 5px; }
 .te-schematic .comment-line { background: #d32f2f; }
 .te-schematic .comment-label { color: #d32f2f; }
 
