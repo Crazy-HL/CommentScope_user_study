@@ -8,13 +8,12 @@
     <div v-if="hasData" class="pie-chart-container">
       <svg ref="chartSvg" class="academic-figure-svg" viewBox="0 0 400 320" role="img" :aria-label="title">
         <g :transform="`translate(${centerX}, ${centerY})`">
-          <path v-for="(slice, index) in slices" :key="slice.condition"
+          <path v-for="slice in visibleSlices" :key="slice.condition"
             :d="slice.path"
             :fill="slice.color"
             stroke="#fff"
             stroke-width="2" />
-          <text v-for="(slice, index) in slices" :key="`label-${slice.condition}`"
-            v-if="slice.percent >= 0.08"
+          <text v-for="slice in labeledSlices" :key="`label-${slice.condition}`"
             :x="slice.labelX"
             :y="slice.labelY"
             text-anchor="middle"
@@ -95,6 +94,9 @@ const slices = computed(() => {
     return { condition, count, percent, path, color: CONDITION_COLORS[condition], labelX, labelY };
   });
 });
+
+const visibleSlices = computed(() => slices.value.filter(s => s.percent > 0 && s.path));
+const labeledSlices = computed(() => slices.value.filter(s => s.percent >= 0.08 && s.path));
 
 function formatPercent(value) {
   return (value * 100).toFixed(1) + "%";
