@@ -231,7 +231,7 @@
               <button class="admin-secondary-button" type="button" @click='download("csv", "events")'>导出原始事件 CSV</button>
               <button class="admin-secondary-button" type="button" @click='download("json", "events")'>导出原始事件 JSON</button>
             </div>
-            <div class="admin-danger-panel" style="margin-top: 12px;"><label>重置参与者<select v-model="resetParticipantId" class="admin-reset-select"><option value="">请选择参与者</option><option v-for="participant in participantOptions" :key="participant" :value="participant">{{ participant }}</option></select></label><button class="admin-danger-button" type="button" :disabled="!resetParticipantId || resetting" @click="resetParticipant">{{ resetting ? "重置中…" : "重置参与者" }}</button></div>
+            <div class="admin-danger-panel" style="margin-top: 12px;"><label>重置参与者<select v-model="resetParticipantId" class="admin-reset-select"><option value="">{{ participantOptions.length ? "请选择参与者" : "暂无可重置的参与者" }}</option><option v-for="participant in participantOptions" :key="participant" :value="participant">{{ participant }}</option></select></label><button class="admin-danger-button" type="button" :disabled="!resetParticipantId || resetting" @click="resetParticipant">{{ resetting ? "重置中…" : "重置参与者" }}</button></div>
           </div>
         </section>
       </template>
@@ -330,10 +330,8 @@ const subjectiveMetrics = [
 ];
 
 const participantOptions = computed(() => {
-  const ids = new Set();
-  for (const item of quality.value?.issues || []) for (const id of item.affected || []) { const match = String(id).match(/P\d{2}/); if (match) ids.add(match[0]); }
-  for (let i = 1; i <= 24; i += 1) ids.add(`P${String(i).padStart(2, "0")}`);
-  return [...ids].sort();
+  const withData = overview.value.participants_with_data || [];
+  return [...withData].sort();
 });
 const overview = computed(() => summary.value?.overview || {});
 const preference = computed(() => summary.value?.preference || {});

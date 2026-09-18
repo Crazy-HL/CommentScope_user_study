@@ -565,6 +565,7 @@ class AdminStats:
             "participants_started": len({row["participant_id"] for row in session_rows}),
             "participants_completed": len({row["participant_id"] for row in session_rows if row["status"] == "completed"}),
             "participants_active": len({row["participant_id"] for row in session_rows if row["status"] == "active"}),
+            "participants_with_data": sorted({row["participant_id"] for row in session_rows}),
             "article_sessions_expected": EXPECTED["article_sessions"],
             "article_sessions_started": sum(row.get("status") in {"active", "completed"} for row in rows),
             "article_sessions_completed": sum(row.get("status") == "completed" for row in rows),
