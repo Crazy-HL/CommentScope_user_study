@@ -16,9 +16,78 @@
         <div class="condition-card" :class="conditionClass">
           <span class="condition-label">{{ conditionLabel }}</span>
           <span class="condition-desc">{{ conditionDesc }}</span>
-          <div class="condition-screenshot">
-            <img :src="conditionImage" :alt="conditionLabel" />
+
+          <!-- TE: 文末集中 -->
+          <div v-if="condition === 'TE'" class="schematic te-schematic">
+            <div class="schematic-article">
+              <div class="line full"></div>
+              <div class="line full"></div>
+              <div class="line med"></div>
+              <div class="line full"></div>
+              <div class="line short"></div>
+            </div>
+            <div class="schematic-divider"></div>
+            <div class="schematic-comments">
+              <div class="comment-line full"></div>
+              <div class="comment-line med"></div>
+              <div class="comment-line full"></div>
+              <div class="comment-line short"></div>
+            </div>
+            <span class="schematic-label">正文</span>
+            <span class="schematic-label comment-label">评论区</span>
           </div>
+
+          <!-- CS: 点击查看 -->
+          <div v-else-if="condition === 'CS'" class="schematic cs-schematic">
+            <div class="schematic-article">
+              <div class="line full"></div>
+              <div class="line full with-marker"></div>
+              <div class="line med"></div>
+              <div class="line full with-marker"></div>
+              <div class="line short"></div>
+            </div>
+            <div class="schematic-arrow">点击 →</div>
+            <div class="schematic-sidebar">
+              <div class="comment-line full"></div>
+              <div class="comment-line med"></div>
+              <div class="comment-line full"></div>
+            </div>
+            <span class="schematic-label">正文（标记处可点击）</span>
+            <span class="schematic-label comment-label">侧边栏评论</span>
+          </div>
+
+          <!-- SE: 句末跟随 -->
+          <div v-else-if="condition === 'SE'" class="schematic se-schematic">
+            <div class="schematic-article">
+              <div class="line full"></div>
+              <div class="line-with-comment">
+                <div class="line med"></div>
+                <div class="inline-comment"></div>
+              </div>
+              <div class="line full"></div>
+              <div class="line-with-comment">
+                <div class="line short"></div>
+                <div class="inline-comment"></div>
+              </div>
+              <div class="line med"></div>
+            </div>
+            <span class="schematic-label">评论紧跟在句子末尾</span>
+          </div>
+
+          <!-- BL: 行间穿插 -->
+          <div v-else-if="condition === 'BL'" class="schematic bl-schematic">
+            <div class="schematic-article">
+              <div class="line full"></div>
+              <div class="line med"></div>
+              <div class="block-comment full"></div>
+              <div class="line full"></div>
+              <div class="line short"></div>
+              <div class="block-comment med"></div>
+              <div class="line full"></div>
+            </div>
+            <span class="schematic-label">评论以独立段落穿插在行间</span>
+          </div>
+
         </div>
         <p class="condition-hint">不同文章会使用不同的评论展示方式，请自然阅读即可。</p>
       </div>
@@ -49,17 +118,16 @@ const props = defineProps({
 defineEmits(["continue"]);
 
 const CONDITION_INFO = {
-  TE: { label: "文末集中 (Text-End)", desc: "所有评论集中显示在文章末尾，阅读完正文后可查看评论。", class: "te", image: "/conditions/te.png" },
-  CS: { label: "点击查看 (Click-to-Show)", desc: "正文中有评论的位置会显示标记，点击标记可在侧边栏查看评论。", class: "cs", image: "/conditions/cs.png" },
-  SE: { label: "句末跟随 (Sentence-End)", desc: "评论紧跟在相关句子的末尾，与正文连续显示。", class: "se", image: "/conditions/se.png" },
-  BL: { label: "行间穿插 (Between-Line)", desc: "评论以独立段落的形式穿插在正文段落之间。", class: "bl", image: "/conditions/bl.png" }
+  TE: { label: "文末集中 (Text-End)", desc: "所有评论集中显示在文章末尾，阅读完正文后可查看评论。", class: "te" },
+  CS: { label: "点击查看 (Click-to-Show)", desc: "正文中有评论的位置会显示标记，点击标记可在侧边栏查看评论。", class: "cs" },
+  SE: { label: "句末跟随 (Sentence-End)", desc: "评论紧跟在相关句子的末尾，与正文连续显示。", class: "se" },
+  BL: { label: "行间穿插 (Between-Line)", desc: "评论以独立段落的形式穿插在正文段落之间。", class: "bl" }
 };
 
-const conditionInfo = computed(() => CONDITION_INFO[props.condition] || { label: "", desc: "", class: "", image: "" });
+const conditionInfo = computed(() => CONDITION_INFO[props.condition] || { label: "", desc: "", class: "" });
 const conditionLabel = computed(() => conditionInfo.value.label);
 const conditionDesc = computed(() => conditionInfo.value.desc);
 const conditionClass = computed(() => conditionInfo.value.class);
-const conditionImage = computed(() => conditionInfo.value.image);
 </script>
 
 <style scoped>
@@ -82,9 +150,50 @@ p, li { line-height: 1.8; }
 .condition-card.bl { border-left: 4px solid #8b5a8b; }
 .condition-label { font-weight: 700; font-size: 15px; color: #17324d; }
 .condition-desc { font-size: 14px; color: #4a6072; line-height: 1.7; }
-.condition-screenshot { margin-top: 8px; border-radius: 8px; overflow: hidden; border: 1px solid #e0e8ec; max-height: 280px; }
-.condition-screenshot img { width: 100%; display: block; }
 .condition-hint { margin: 10px 0 0; font-size: 13px; color: #7a8ea0; font-style: italic; }
+
+/* 示意图通用样式 */
+.schematic { position: relative; margin-top: 10px; padding: 18px 16px 28px; background: #fff; border: 1px solid #e8eef2; border-radius: 8px; display: flex; gap: 12px; align-items: flex-start; }
+.schematic-article { flex: 1; display: flex; flex-direction: column; gap: 7px; }
+.schematic .line { height: 10px; background: #c8d3dc; border-radius: 3px; }
+.schematic .line.full { width: 100%; }
+.schematic .line.med { width: 72%; }
+.schematic .line.short { width: 45%; }
+.schematic .comment-line { height: 10px; border-radius: 3px; }
+.schematic .comment-line.full { width: 100%; }
+.schematic .comment-line.med { width: 70%; }
+.schematic .comment-line.short { width: 50%; }
+.schematic-label { position: absolute; bottom: 8px; left: 16px; font-size: 11px; color: #8a9baa; }
+.schematic-label.comment-label { left: auto; right: 16px; }
+
+/* TE 文末集中 */
+.te-schematic { flex-direction: column; }
+.te-schematic .schematic-divider { height: 1px; background: #dde4ea; margin: 4px 0; }
+.te-schematic .schematic-comments { display: flex; flex-direction: column; gap: 7px; padding-top: 4px; }
+.te-schematic .comment-line { background: #2b7a78; }
+.te-schematic .comment-label { color: #2b7a78; }
+
+/* CS 点击查看 */
+.cs-schematic .schematic-article { flex: 1.2; }
+.cs-schematic .line.with-marker { position: relative; }
+.cs-schematic .line.with-marker::after { content: ""; position: absolute; right: -4px; top: 50%; transform: translateY(-50%); width: 8px; height: 8px; background: #c0792e; border-radius: 50%; }
+.cs-schematic .schematic-arrow { display: flex; align-items: center; font-size: 12px; color: #c0792e; font-weight: 600; padding-top: 14px; }
+.cs-schematic .schematic-sidebar { flex: 0.7; display: flex; flex-direction: column; gap: 7px; padding: 10px 8px; background: #fdf6ee; border: 1px solid #f0dcc4; border-radius: 6px; min-height: 80px; }
+.cs-schematic .comment-line { background: #c0792e; }
+.cs-schematic .comment-label { color: #c0792e; }
+
+/* SE 句末跟随 */
+.se-schematic .schematic-article { width: 100%; }
+.se-schematic .line-with-comment { display: flex; align-items: center; gap: 6px; }
+.se-schematic .inline-comment { height: 10px; background: #5a6fa8; border-radius: 3px; flex: 1; min-width: 60px; }
+.se-schematic .schematic-label { color: #5a6fa8; left: 50%; transform: translateX(-50%); }
+
+/* BL 行间穿插 */
+.bl-schematic .schematic-article { width: 100%; }
+.bl-schematic .block-comment { height: 14px; background: #8b5a8b; border-radius: 3px; margin: 2px 0; }
+.bl-schematic .block-comment.full { width: 100%; }
+.bl-schematic .block-comment.med { width: 68%; }
+.bl-schematic .schematic-label { color: #8b5a8b; left: 50%; transform: translateX(-50%); }
 
 .question-intro { margin: 20px 0; padding: 16px 18px; background: #f8f9fa; border-radius: 10px; }
 .question-intro ul { margin: 0; padding-left: 20px; }
