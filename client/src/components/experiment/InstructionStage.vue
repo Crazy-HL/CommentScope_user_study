@@ -88,6 +88,18 @@
             <span class="schematic-label">评论以独立段落穿插在行间</span>
           </div>
 
+          <!-- 图例 -->
+          <div class="schematic-legend">
+            <span class="legend-item">
+              <span class="legend-swatch article-swatch"></span>
+              <span class="legend-text">正文</span>
+            </span>
+            <span class="legend-item">
+              <span class="legend-swatch comment-swatch"></span>
+              <span class="legend-text">读者评论</span>
+            </span>
+          </div>
+
         </div>
         <p class="condition-hint">不同文章会使用不同的评论展示方式，请自然阅读即可。</p>
       </div>
@@ -155,7 +167,7 @@ p, li { line-height: 1.8; }
 /* 示意图通用样式 */
 .schematic { position: relative; margin-top: 10px; padding: 18px 16px 28px; background: #fff; border: 1px solid #e8eef2; border-radius: 8px; display: flex; gap: 12px; align-items: flex-start; }
 .schematic-article { flex: 1; width: 100%; display: flex; flex-direction: column; gap: 7px; }
-.schematic .line { display: block; height: 10px; background: #c8d3dc; border-radius: 3px; flex-shrink: 0; }
+.schematic .line { display: block; height: 10px; background: #2c2c2c; border-radius: 3px; flex-shrink: 0; }
 .schematic .line.full { width: 100%; }
 .schematic .line.med { width: 72%; }
 .schematic .line.short { width: 45%; }
@@ -166,34 +178,42 @@ p, li { line-height: 1.8; }
 .schematic-label { position: absolute; bottom: 8px; left: 16px; font-size: 11px; color: #8a9baa; }
 .schematic-label.comment-label { left: auto; right: 16px; }
 
+/* 图例 */
+.schematic-legend { display: flex; gap: 24px; justify-content: center; margin-top: 12px; padding-top: 10px; border-top: 1px solid #eef2f5; }
+.legend-item { display: flex; align-items: center; gap: 6px; }
+.legend-swatch { display: inline-block; width: 24px; height: 10px; border-radius: 2px; }
+.legend-swatch.article-swatch { background: #2c2c2c; }
+.legend-swatch.comment-swatch { background: #d32f2f; }
+.legend-text { font-size: 12px; color: #5a6a7a; }
+
 /* TE 文末集中 */
 .te-schematic { flex-direction: column; }
 .te-schematic .schematic-divider { height: 1px; background: #dde4ea; margin: 4px 0; }
 .te-schematic .schematic-comments { width: 100%; display: flex; flex-direction: column; gap: 7px; padding-top: 4px; }
-.te-schematic .comment-line { background: #2b7a78; }
-.te-schematic .comment-label { color: #2b7a78; }
+.te-schematic .comment-line { background: #d32f2f; }
+.te-schematic .comment-label { color: #d32f2f; }
 
 /* CS 点击查看 */
 .cs-schematic .schematic-article { flex: 1.2; }
 .cs-schematic .line.with-marker { position: relative; }
-.cs-schematic .line.with-marker::after { content: ""; position: absolute; right: -4px; top: 50%; transform: translateY(-50%); width: 8px; height: 8px; background: #c0792e; border-radius: 50%; }
-.cs-schematic .schematic-arrow { display: flex; align-items: center; font-size: 12px; color: #c0792e; font-weight: 600; padding-top: 14px; }
-.cs-schematic .schematic-sidebar { flex: 0.7; display: flex; flex-direction: column; gap: 7px; padding: 10px 8px; background: #fdf6ee; border: 1px solid #f0dcc4; border-radius: 6px; min-height: 80px; }
-.cs-schematic .comment-line { background: #c0792e; }
-.cs-schematic .comment-label { color: #c0792e; }
+.cs-schematic .line.with-marker::after { content: ""; position: absolute; right: -4px; top: 50%; transform: translateY(-50%); width: 8px; height: 8px; background: #d32f2f; border-radius: 50%; }
+.cs-schematic .schematic-arrow { display: flex; align-items: center; font-size: 12px; color: #d32f2f; font-weight: 600; padding-top: 14px; }
+.cs-schematic .schematic-sidebar { flex: 0.7; display: flex; flex-direction: column; gap: 7px; padding: 10px 8px; background: #fef0f0; border: 1px solid #f5c6c6; border-radius: 6px; min-height: 80px; }
+.cs-schematic .comment-line { background: #d32f2f; }
+.cs-schematic .comment-label { color: #d32f2f; }
 
 /* SE 句末跟随 */
 .se-schematic .schematic-article { width: 100%; }
 .se-schematic .line-with-comment { display: flex; align-items: center; gap: 6px; }
-.se-schematic .inline-comment { height: 10px; background: #5a6fa8; border-radius: 3px; flex: 1; min-width: 60px; }
-.se-schematic .schematic-label { color: #5a6fa8; left: 50%; transform: translateX(-50%); }
+.se-schematic .inline-comment { height: 10px; background: #d32f2f; border-radius: 3px; flex: 1; min-width: 60px; }
+.se-schematic .schematic-label { color: #d32f2f; left: 50%; transform: translateX(-50%); }
 
 /* BL 行间穿插 */
 .bl-schematic .schematic-article { width: 100%; }
-.bl-schematic .block-comment { height: 14px; background: #8b5a8b; border-radius: 3px; margin: 2px 0; }
+.bl-schematic .block-comment { height: 14px; background: #d32f2f; border-radius: 3px; margin: 2px 0; }
 .bl-schematic .block-comment.full { width: 100%; }
 .bl-schematic .block-comment.med { width: 68%; }
-.bl-schematic .schematic-label { color: #8b5a8b; left: 50%; transform: translateX(-50%); }
+.bl-schematic .schematic-label { color: #d32f2f; left: 50%; transform: translateX(-50%); }
 
 .question-intro { margin: 20px 0; padding: 16px 18px; background: #f8f9fa; border-radius: 10px; }
 .question-intro ul { margin: 0; padding-left: 20px; }
