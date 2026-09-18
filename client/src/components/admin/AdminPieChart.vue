@@ -6,7 +6,7 @@
     </div>
 
     <div v-if="hasData" class="pie-chart-container">
-      <svg ref="chartSvg" class="academic-figure-svg" viewBox="0 0 400 320" role="img" :aria-label="title">
+      <svg ref="chartSvg" class="pie-svg" viewBox="0 0 260 240" role="img" :aria-label="title">
         <g :transform="`translate(${centerX}, ${centerY})`">
           <path v-for="slice in visibleSlices" :key="slice.condition"
             :d="slice.path"
@@ -19,7 +19,7 @@
             text-anchor="middle"
             dominant-baseline="middle"
             fill="#fff"
-            font-size="13"
+            font-size="11"
             font-weight="700">{{ formatPercent(slice.percent) }}</text>
         </g>
       </svg>
@@ -27,7 +27,7 @@
         <div v-for="slice in slices" :key="`legend-${slice.condition}`" class="pie-legend-item">
           <span class="pie-legend-color" :style="{ background: slice.color }"></span>
           <span class="pie-legend-label">{{ slice.condition }}</span>
-          <span class="pie-legend-value">{{ formatPercent(slice.percent) }} ({{ slice.count }}人)</span>
+          <span class="pie-legend-value">{{ formatPercent(slice.percent) }}</span>
         </div>
       </div>
     </div>
@@ -37,6 +37,7 @@
 
 <script setup>
 import { computed, ref } from "vue";
+import { coolwarmColor } from "./academicFigureUtils";
 
 const props = defineProps({
   title: { type: String, required: true },
@@ -45,31 +46,25 @@ const props = defineProps({
 });
 
 const chartSvg = ref(null);
+const CONDITIONS = ["TE", "CS", "SE", "BL"];
 
-const CONDITION_COLORS = {
-  TE: "#2b7a78",
-  CS: "#c0792e",
-  SE: "#5a6fa8",
-  BL: "#8b5a8b"
-};
-
-const centerX = 140;
-const centerY = 160;
-const radius = 110;
+const centerX = 110;
+const centerY = 120;
+const radius = 95;
 
 const hasData = computed(() => {
   return props.total > 0 && Object.values(props.data).some(v => (v?.count || 0) > 0);
 });
 
 const slices = computed(() => {
-  const conditions = ["TE", "CS", "SE", "BL"];
   const total = props.total || 0;
   let startAngle = -Math.PI / 2;
 
-  return conditions.map(condition => {
+  return CONDITIONS.map((condition, index) => {
     const count = props.data[condition]?.count || 0;
     const percent = total > 0 ? count / total : 0;
     const endAngle = startAngle + percent * Math.PI * 2;
+    const color = coolwarmColor(index / (CONDITIONS.length - 1));
 
     const largeArc = percent > 0.5 ? 1 : 0;
     const x1 = Math.cos(startAngle) * radius;
@@ -85,13 +80,13 @@ const slices = computed(() => {
     }
 
     const midAngle = (startAngle + endAngle) / 2;
-    const labelRadius = radius * 0.65;
+    const labelRadius = radius * 0.6;
     const labelX = Math.cos(midAngle) * labelRadius;
     const labelY = Math.sin(midAngle) * labelRadius;
 
     startAngle = endAngle;
 
-    return { condition, count, percent, path, color: CONDITION_COLORS[condition], labelX, labelY };
+    return { condition, count, percent, path, color, labelX, labelY };
   });
 });
 
@@ -112,11 +107,11 @@ function exportChart() {
   const url = URL.createObjectURL(svgBlob);
 
   img.onload = () => {
-    canvas.width = 800;
-    canvas.height = 640;
+    canvas.width = 520;
+    canvas.height = 480;
     ctx.fillStyle = "#fff";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 10, 10, canvas.width - 20, canvas.height - 20);
     URL.revokeObjectURL(url);
 
     const link = document.createElement("a");
@@ -129,11 +124,12 @@ function exportChart() {
 </script>
 
 <style scoped>
-.pie-chart-container { display: flex; align-items: center; gap: 20px; padding: 10px; }
-.pie-legend { display: flex; flex-direction: column; gap: 10px; }
-.pie-legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; }
-.pie-legend-color { width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; }
-.pie-legend-label { font-weight: 600; color: #17324d; min-width: 30px; }
+.pie-chart-container { display: flex; align-items: center; gap: 8px; padding: 4px; }
+.pie-svg { flex-shrink: 0; width: 180px; height: auto; }
+.pie-legend { display: flex; flex-direction: column; gap: 6px; }
+.pie-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+.pie-legend-color { width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; }
+.pie-legend-label { font-weight: 600; color: #17324d; min-width: 26px; }
 .pie-legend-value { color: #526b82; }
-.academic-empty-state { padding: 40px; text-align: center; color: #8a9baa; font-size: 14px; }
+.academic-empty-state { padding: 30px; text-align: center; color: #8a9baa; font-size: 13px; }
 </style>
