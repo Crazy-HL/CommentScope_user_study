@@ -24,7 +24,11 @@ const props = defineProps({
   renderMode: { type: String, default: "" }
 });
 const emit = defineEmits(["exit"]);
-const stageTitle = computed(() => STAGE_TITLES[props.stage] || "实验进行中");
+const QUESTION_STAGES = new Set(["cra", "aca", "ctia", "location"]);
+const stageTitle = computed(() => {
+  if (QUESTION_STAGES.has(props.stage)) return "答题";
+  return STAGE_TITLES[props.stage] || "实验进行中";
+});
 const conditionLabel = computed(() => props.renderMode ? conditionLabelForRenderMode(props.renderMode) : "");
 const RENDER_MODE_TO_CODE = { layout_a: "TE", layout_b: "CS", layout_c: "SE", layout_d: "BL" };
 const conditionCode = computed(() => RENDER_MODE_TO_CODE[props.renderMode] || "");
