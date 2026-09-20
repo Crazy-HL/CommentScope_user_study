@@ -376,7 +376,7 @@ export default defineComponent({
   },
   methods: {
     toggleInlineComment(sentenceIndex) {
-      this.$set(this.expandedInlineComments, sentenceIndex, !this.expandedInlineComments[sentenceIndex]);
+      this.expandedInlineComments[sentenceIndex] = !this.expandedInlineComments[sentenceIndex];
     },
     isGlobal(item) {
       return item.comment.global === true || item.comment.scope === "global" || (Array.isArray(item.comment.link) && (item.comment.link.length === 0 || item.comment.link[0] === -1));
@@ -409,7 +409,7 @@ export default defineComponent({
       this.note("comment_close", null);
     },
     toggleParagraph(index) {
-      this.$set ? this.$set(this.expandedParagraphs, index, !this.expandedParagraphs[index]) : (this.expandedParagraphs[index] = !this.expandedParagraphs[index]);
+      this.expandedParagraphs[index] = !this.expandedParagraphs[index];
       this.note("paragraph_toggle", { paragraph_index: index, expanded: Boolean(this.expandedParagraphs[index]) });
     },
     note(type, payload = {}) {
