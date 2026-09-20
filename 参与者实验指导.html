@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CommentScope 实验参与指南</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  color: #1a2332;
+  background: #f5f7fa;
+  line-height: 1.8;
+}
+.container { max-width: 760px; margin: 0 auto; padding: 40px 24px; }
+
+.header {
+  background: linear-gradient(135deg, #2b7a78 0%, #3a9d9a 100%);
+  color: #fff;
+  border-radius: 16px;
+  padding: 40px 36px;
+  margin-bottom: 32px;
+}
+.header h1 { font-size: 28px; margin-bottom: 8px; }
+.header p { font-size: 15px; opacity: 0.9; }
+
+.card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 28px 32px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.06);
+}
+.card h2 {
+  font-size: 19px;
+  color: #17324d;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #eef3f4;
+}
+.card h3 {
+  font-size: 15px;
+  color: #2b7a78;
+  margin: 18px 0 10px;
+}
+
+ul, ol { padding-left: 24px; margin-bottom: 12px; }
+li { margin-bottom: 8px; font-size: 14.5px; }
+
+.highlight {
+  background: #fff8e6;
+  border-left: 4px solid #f0b429;
+  padding: 14px 18px;
+  border-radius: 0 8px 8px 0;
+  margin: 14px 0;
+  font-size: 14px;
+}
+.danger {
+  background: #fef2f2;
+  border-left: 4px solid #ef4444;
+  padding: 14px 18px;
+  border-radius: 0 8px 8px 0;
+  margin: 14px 0;
+  font-size: 14px;
+}
+.tip {
+  background: #f0f9f4;
+  border-left: 4px solid #22c55e;
+  padding: 14px 18px;
+  border-radius: 0 8px 8px 0;
+  margin: 14px 0;
+  font-size: 14px;
+}
+
+.time-badge {
+  display: inline-block;
+  background: #eef4f8;
+  color: #35536f;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-left: 8px;
+}
+
+.flow-step {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 14px;
+  align-items: flex-start;
+}
+.step-num {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #2b7a78;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+}
+.step-content { flex: 1; }
+.step-title { font-weight: 600; font-size: 15px; color: #17324d; margin-bottom: 4px; }
+.step-desc { font-size: 14px; color: #5a6f7f; }
+
+.faq-item {
+  border-bottom: 1px solid #eef3f4;
+  padding: 14px 0;
+}
+.faq-q { font-weight: 600; font-size: 15px; color: #17324d; margin-bottom: 6px; }
+.faq-a { font-size: 14px; color: #5a6f7f; }
+
+.footer {
+  text-align: center;
+  padding: 24px;
+  color: #8a9aa2;
+  font-size: 13px;
+}
+
+@media (max-width: 600px) {
+  .container { padding: 20px 12px; }
+  .card { padding: 20px; }
+  .header { padding: 28px 20px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+  <h1>实验参与指南</h1>
+  <p>感谢您参与 CommentScope 用户研究实验，本指南将帮助您了解实验流程和注意事项</p>
+</div>
+
+<div class="card">
+  <h2>一、实验简介</h2>
+  <p style="font-size: 14.5px; margin-bottom: 12px;">
+    您好！欢迎参与本次在线评论阅读界面的用户研究。
+  </p>
+  <p style="font-size: 14.5px; margin-bottom: 12px;">
+    本实验旨在研究不同的评论展示方式如何影响人们的阅读体验和信息理解。您将阅读几篇文章并回答相关问题，整个过程大约需要 <strong>30-40 分钟</strong>。
+  </p>
+  <div class="tip">
+    <strong>没有"对错"之分</strong>——请按您的真实感受和习惯作答即可。
+  </div>
+</div>
+
+<div class="card">
+  <h2>二、实验前准备</h2>
+  
+  <h3>设备要求</h3>
+  <ul>
+    <li>请使用<strong>电脑</strong>（笔记本或台式机）进行实验，暂不支持手机/平板</li>
+    <li>推荐使用 Chrome 或 Edge 浏览器</li>
+    <li>确保网络连接稳定</li>
+  </ul>
+
+  <h3>环境要求</h3>
+  <ul>
+    <li>请选择<strong>安静、不受打扰</strong>的环境</li>
+    <li>关闭手机通知、微信弹窗等干扰</li>
+    <li>预留完整的 <strong>30-40 分钟</strong>，中途不要离开太久</li>
+  </ul>
+
+  <div class="highlight">
+    <strong>小提示：</strong>实验过程中会自动保存进度，如果中途需要短暂离开，回来后可以从断点继续。
+  </div>
+</div>
+
+<div class="card">
+  <h2>三、实验流程</h2>
+
+  <div class="flow-step">
+    <div class="step-num">1</div>
+    <div class="step-content">
+      <div class="step-title">输入参与者编号</div>
+      <div class="step-desc">请输入您的专属参与者编号（由实验组织者提供）。</div>
+    </div>
+  </div>
+
+  <div class="flow-step">
+    <div class="step-num">2</div>
+    <div class="step-content">
+      <div class="step-title">阅读实验说明</div>
+      <div class="step-desc">简要了解任务要求和本篇文章使用的评论展示方式。</div>
+    </div>
+  </div>
+
+  <div class="flow-step">
+    <div class="step-num">3</div>
+    <div class="step-content">
+      <div class="step-title">自然阅读文章</div>
+      <div class="step-desc">请像平时阅读新闻一样自然浏览文章和评论，时间不限。</div>
+    </div>
+  </div>
+
+  <div class="flow-step">
+    <div class="step-num">4</div>
+    <div class="step-content">
+      <div class="step-title">回答测试题目</div>
+      <div class="step-desc">阅读完成后，系统会逐题弹出问题，请根据您的阅读感受作答。</div>
+    </div>
+  </div>
+
+  <div class="flow-step">
+    <div class="step-num">5</div>
+    <div class="step-content">
+      <div class="step-title">填写体验评价</div>
+      <div class="step-desc">对本次使用的阅读界面进行主观评分。</div>
+    </div>
+  </div>
+
+  <div class="flow-step">
+    <div class="step-num">6</div>
+    <div class="step-content">
+      <div class="step-title">重复完成 4 篇文章</div>
+      <div class="step-desc">每篇文章使用不同的评论展示方式，依次完成即可。</div>
+    </div>
+  </div>
+
+  <div class="flow-step">
+    <div class="step-num">7</div>
+    <div class="step-content">
+      <div class="step-title">偏好排序与反馈</div>
+      <div class="step-desc">完成全部文章后，请对四种界面进行偏好排序，并填写简短反馈。</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>四、答题注意事项</h2>
+
+  <ul>
+    <li><strong>独立作答</strong>：请不要查阅资料或与他人讨论，凭您的真实感受回答</li>
+    <li><strong>不可修改</strong>：题目提交后无法返回修改，请确认后再提交</li>
+    <li><strong>可以回看文章</strong>：答题时可以点击"返回文章"查看正文</li>
+    <li><strong>不要刷新</strong>：请勿刷新页面或使用浏览器后退按钮，防止进度丢失</li>
+  </ul>
+
+  <div class="danger">
+    <strong>请勿提问内容相关问题</strong>——为了保证实验的公平性，实验过程中关于题目内容的问题将不予解答。请凭您的第一感觉选择即可。
+  </div>
+</div>
+
+<div class="card">
+  <h2>五、常见问题</h2>
+
+  <div class="faq-item">
+    <div class="faq-q">Q：我中途有事离开了，进度会丢失吗？</div>
+    <div class="faq-a">不会。系统会自动保存您的进度，回来后用同一个参与者编号继续即可。但建议尽量不要离开太久。</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">Q：页面打不开/按钮点不了怎么办？</div>
+    <div class="faq-a">如果遇到技术问题，请截图并联系现场的实验人员，他们会协助您解决。</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">Q：我可以在文章里搜索关键词吗？</div>
+    <div class="faq-a">可以。请像平时阅读文章一样自然浏览即可，不需要刻意做笔记或记忆内容。</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">Q：阅读的时候一定要看评论吗？</div>
+    <div class="faq-a">不一定。请按您平时的阅读习惯决定是否看评论，想看就看，不想看也没关系。</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">Q：实验数据会公开吗？</div>
+    <div class="faq-a">不会。所有数据匿名处理，仅用于学术研究分析，不会泄露您的个人信息。</div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>六、技术支持</h2>
+  <p style="font-size: 14.5px;">
+    如果在实验过程中遇到任何<strong>技术问题</strong>（如页面无法加载、按钮无响应、显示异常等），请：
+  </p>
+  <ol>
+    <li>先尝试刷新页面</li>
+    <li>如果刷新无效，请截图保存错误画面</li>
+    <li>联系现场实验人员协助处理</li>
+  </ol>
+  <div class="tip">
+    实验人员会全程在场待命，专门处理技术问题。
+  </div>
+</div>
+
+<div class="footer">
+  CommentScope 用户研究实验 · 感谢您的参与
+</div>
+
+</div>
+</body>
+</html>
