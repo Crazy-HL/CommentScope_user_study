@@ -4,13 +4,14 @@
       <h1>四种界面偏好排序</h1>
       <p class="intro">请根据你的使用体验，将下方四种界面卡片拖入或点击填入排名槽位。每种界面只能出现一次。</p>
 
-      <!-- 界面说明卡片 -->
+      <!-- 界面说明卡片（带示意图） -->
       <div class="interface-legend">
         <div v-for="option in options" :key="option.value" class="legend-card" :class="`legend-${option.value.toLowerCase()}`">
           <div class="legend-header">
             <span class="legend-badge" :class="`badge-${option.value.toLowerCase()}`">{{ option.value }}</span>
-            <span class="legend-name">{{ option.shortName }}</span>
+            <span class="legend-name">{{ option.fullName }}</span>
           </div>
+          <img :src="option.image" :alt="option.fullName" class="legend-image" />
           <p class="legend-desc">{{ option.description }}</p>
         </div>
       </div>
@@ -26,15 +27,16 @@
             @click="clearRank(rank - 1)">
             <div class="rank-label">第 {{ rank }} 名</div>
             <div v-if="ranking[rank - 1]" class="rank-card" :class="`card-${ranking[rank - 1].toLowerCase()}`">
+              <img :src="getOptionImage(ranking[rank - 1])" class="rank-mini-image" />
               <span class="rank-badge" :class="`badge-${ranking[rank - 1].toLowerCase()}`">{{ ranking[rank - 1] }}</span>
-              <span class="rank-name">{{ getOptionName(ranking[rank - 1]) }}</span>
+              <span class="rank-name">{{ getOptionFullName(ranking[rank - 1]) }}</span>
               <span class="rank-remove">✕</span>
             </div>
             <div v-else class="rank-placeholder">点击下方界面卡片填入</div>
           </div>
         </div>
 
-        <!-- 待选界面卡片 -->
+        <!-- 待选界面卡片（带示意图） -->
         <div class="available-cards">
           <div class="available-title">待选界面（点击填入排名）</div>
           <div class="available-grid">
@@ -44,8 +46,11 @@
               class="available-card"
               :class="`card-${option.value.toLowerCase()}`"
               @click="selectNext(option.value)">
-              <span class="available-badge" :class="`badge-${option.value.toLowerCase()}`">{{ option.value }}</span>
-              <span class="available-name">{{ option.shortName }}</span>
+              <img :src="option.image" :alt="option.fullName" class="available-image" />
+              <div class="available-info">
+                <span class="available-badge" :class="`badge-${option.value.toLowerCase()}`">{{ option.value }}</span>
+                <span class="available-name">{{ option.fullName }}</span>
+              </div>
             </div>
           </div>
           <p v-if="!availableOptions.length" class="all-selected">所有界面已分配排名，点击已选卡片可取消重选。</p>
@@ -68,17 +73,21 @@ import { PREFERENCE_OPTIONS } from "../../experiment/experimentConfig";
 const props = defineProps({ api: { type: Object, required: true }, sessionId: { type: String, required: true } });
 const emit = defineEmits(["completed"]);
 
-// 扩展选项，添加短名称和详细说明
+// 扩展选项，添加完整名称、示意图和详细说明
 const options = PREFERENCE_OPTIONS.map(opt => ({
   ...opt,
-  shortName: opt.value === "TE" ? "文末集中" :
-             opt.value === "CS" ? "点击查看" :
-             opt.value === "SE" ? "句末跟随" :
-             "行间穿插",
-  description: opt.value === "TE" ? "所有评论集中显示在文章末尾，阅读时不打断正文。" :
-               opt.value === "CS" ? "正文中有评论的句子带下划线，点击句子在侧边栏查看评论。" :
-               opt.value === "SE" ? "每条评论紧跟在其所评论的句子后面，阅读时自然衔接。" :
-               "评论穿插在正文段落之间，与正文交替呈现。"
+  fullName: opt.value === "TE" ? "文末嵌入（TE）" :
+            opt.value === "CS" ? "点击查看（CS）" :
+            opt.value === "SE" ? "句末跟随（SE）" :
+            "行间穿插（BL）",
+  image: opt.value === "TE" ? "/images/te-schematic.png" :
+         opt.value === "CS" ? "/images/cs-schematic.png" :
+         opt.value === "SE" ? "/images/se-schematic.png" :
+         "/images/bl-schematic.png",
+  description: opt.value === "TE" ? "所有评论以卡片形式集中显示在文章末尾，阅读完正文后可查看评论。" :
+               opt.value === "CS" ? "正文中有评论的位置会显示标记，点击标记可在侧边栏查看评论。" :
+               opt.value === "SE" ? "评论紧跟在相关句子的末尾，与正文连续显示。" :
+               "评论以独立段落的形式穿插在正文段落之间。"
 }));
 
 const ranking = reactive(["", "", "", ""]);
@@ -98,9 +107,13 @@ function selectNext(value) {
 function clearRank(index) {
   ranking[index] = "";
 }
-function getOptionName(value) {
+function getOptionFullName(value) {
   const opt = options.find(o => o.value === value);
-  return opt ? opt.shortName : value;
+  return opt ? opt.fullName : value;
+}
+function getOptionImage(value) {
+  const opt = options.find(o => o.value === value);
+  return opt ? opt.image : "";
 }
 
 async function submit() {
@@ -115,21 +128,22 @@ async function submit() {
 
 <style scoped>
 .survey-page { min-height: calc(100vh - 62px); display: grid; place-items: center; padding: 26px 18px; background: #f4f7f9; }
-.survey-card { width: min(780px, 100%); padding: 32px; border: 1px solid #d9e4ea; border-radius: 16px; background: #fff; }
+.survey-card { width: min(860px, 100%); padding: 32px; border: 1px solid #d9e4ea; border-radius: 16px; background: #fff; }
 h1 { color: #17324d; margin: 0 0 8px; }
 .intro { color: #607586; margin: 0 0 20px; line-height: 1.6; }
 
 /* 界面说明卡片 */
-.interface-legend { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }
-.legend-card { padding: 12px 14px; border-radius: 10px; border: 1px solid #e2eaed; background: #fafcfc; }
-.legend-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-.legend-name { font-weight: 700; color: #2c4a5e; font-size: 14px; }
-.legend-desc { margin: 0; font-size: 12px; color: #6b7f8f; line-height: 1.5; }
+.interface-legend { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 24px; }
+.legend-card { padding: 12px; border-radius: 10px; border: 1px solid #e2eaed; background: #fafcfc; }
+.legend-header { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+.legend-name { font-weight: 700; color: #2c4a5e; font-size: 13px; }
+.legend-image { width: 100%; height: auto; border-radius: 6px; margin-bottom: 8px; }
+.legend-desc { margin: 0; font-size: 11px; color: #6b7f8f; line-height: 1.5; }
 
 /* 颜色标签 */
 .legend-badge, .rank-badge, .available-badge {
   display: inline-flex; align-items: center; justify-content: center;
-  min-width: 32px; height: 24px; padding: 0 8px;
+  min-width: 32px; height: 22px; padding: 0 8px;
   border-radius: 5px; font-size: 11px; font-weight: 800; color: #fff;
 }
 .badge-te { background: #2b7a78; }
@@ -143,7 +157,7 @@ h1 { color: #17324d; margin: 0 0 8px; }
   display: flex; align-items: center; gap: 12px;
   padding: 10px 14px; border-radius: 10px;
   border: 2px dashed #d0dde5; background: #f7fafb;
-  cursor: pointer; transition: all .2s; min-height: 52px;
+  cursor: pointer; transition: all .2s; min-height: 56px;
 }
 .rank-slot.slot-filled { border-style: solid; border-color: transparent; background: #fff; padding: 8px 14px; }
 .rank-slot.slot-empty:hover { border-color: #2b7a78; background: #f0f7f7; }
@@ -151,8 +165,9 @@ h1 { color: #17324d; margin: 0 0 8px; }
 .rank-placeholder { color: #9fb0b8; font-size: 13px; }
 .rank-card {
   flex: 1; display: flex; align-items: center; gap: 10px;
-  padding: 8px 12px; border-radius: 8px; color: #fff;
+  padding: 6px 12px; border-radius: 8px; color: #fff;
 }
+.rank-mini-image { width: 40px; height: auto; border-radius: 4px; }
 .rank-card.card-te { background: linear-gradient(135deg, #2b7a78, #1a5f5d); }
 .rank-card.card-cs { background: linear-gradient(135deg, #c0792e, #a06020); }
 .rank-card.card-se { background: linear-gradient(135deg, #5a6fa8, #45588a); }
@@ -164,18 +179,20 @@ h1 { color: #17324d; margin: 0 0 8px; }
 /* 待选卡片 */
 .available-cards { margin-bottom: 24px; padding: 14px; background: #f7fafb; border-radius: 10px; border: 1px solid #e2eaed; }
 .available-title { font-size: 13px; font-weight: 700; color: #6b7f8f; margin-bottom: 10px; }
-.available-grid { display: flex; gap: 10px; flex-wrap: wrap; }
+.available-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
 .available-card {
-  display: flex; align-items: center; gap: 8px;
-  padding: 8px 14px; border-radius: 8px; color: #fff;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: 10px; border-radius: 8px; color: #fff;
   cursor: pointer; transition: transform .15s, box-shadow .15s;
 }
 .available-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.15); }
+.available-image { width: 100%; height: auto; border-radius: 6px; }
+.available-info { display: flex; align-items: center; gap: 6px; }
 .available-card.card-te { background: linear-gradient(135deg, #2b7a78, #1a5f5d); }
 .available-card.card-cs { background: linear-gradient(135deg, #c0792e, #a06020); }
 .available-card.card-se { background: linear-gradient(135deg, #5a6fa8, #45588a); }
 .available-card.card-bl { background: linear-gradient(135deg, #8b5a8b, #6e456e); }
-.available-name { font-weight: 700; font-size: 13px; }
+.available-name { font-weight: 700; font-size: 12px; }
 .all-selected { margin: 8px 0 0; font-size: 12px; color: #2b7a78; }
 
 .reason { display: block; margin-top: 20px; color: #294257; font-weight: 700; }
@@ -184,8 +201,11 @@ button { display: block; margin: 22px 0 0 auto; padding: 13px 24px; border: 0; b
 button:disabled { opacity: .5; cursor: not-allowed; }
 .error { color: #8b1e2d; }
 
+@media (max-width: 768px) {
+  .interface-legend { grid-template-columns: repeat(2, 1fr); }
+  .available-grid { grid-template-columns: repeat(2, 1fr); }
+}
 @media (max-width: 600px) {
-  .interface-legend { grid-template-columns: 1fr; }
   .survey-card { padding: 20px; }
 }
 </style>
