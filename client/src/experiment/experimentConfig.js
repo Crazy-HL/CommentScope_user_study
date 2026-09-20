@@ -10,10 +10,10 @@ export const CONDITION_CODES = Object.freeze(["TE", "CS", "SE", "BL"]);
 
 // Render mode (opaque server-side identifier) to human-readable condition label.
 export const RENDER_MODE_LABELS = Object.freeze({
-  layout_a: "Text-End (TE)",
-  layout_b: "Click-to-Show (CS)",
-  layout_c: "Sentence-End (SE)",
-  layout_d: "Between-Line (BL)"
+  layout_a: "文末嵌入（TE）",
+  layout_b: "点击查看（CS）",
+  layout_c: "句末跟随（SE）",
+  layout_d: "行间穿插（BL）"
 });
 
 export function conditionLabelForRenderMode(renderMode) {
