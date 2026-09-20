@@ -142,14 +142,19 @@ CONDITION_LABELS = {
     "BL": "Between-Line",
 }
 GROUP_ALLOCATIONS = {
-    "G1": {"order": ARTICLE_IDS, "conditions": {"A02": "TE", "A03": "CS", "A04": "SE", "A07": "BL"}},
-    "G2": {"order": ("A03", "A04", "A07", "A02"), "conditions": {"A02": "CS", "A03": "SE", "A04": "BL", "A07": "TE"}},
-    "G3": {"order": ("A04", "A07", "A02", "A03"), "conditions": {"A02": "SE", "A03": "BL", "A04": "TE", "A07": "CS"}},
-    "G4": {"order": ("A07", "A02", "A03", "A04"), "conditions": {"A02": "BL", "A03": "TE", "A04": "CS", "A07": "SE"}},
+    "S1": {"order": ("A02", "A04", "A03", "A07"), "conditions": {"A02": "TE", "A04": "SE", "A03": "CS", "A07": "BL"}},
+    "S2": {"order": ("A04", "A07", "A02", "A03"), "conditions": {"A04": "CS", "A07": "TE", "A02": "BL", "A03": "SE"}},
+    "S3": {"order": ("A03", "A02", "A07", "A04"), "conditions": {"A03": "SE", "A02": "BL", "A07": "TE", "A04": "CS"}},
+    "S4": {"order": ("A07", "A03", "A04", "A02"), "conditions": {"A07": "BL", "A03": "CS", "A04": "SE", "A02": "TE"}},
+    "S5": {"order": ("A03", "A02", "A07", "A04"), "conditions": {"A03": "BL", "A02": "CS", "A07": "SE", "A04": "TE"}},
+    "S6": {"order": ("A02", "A04", "A03", "A07"), "conditions": {"A02": "SE", "A04": "BL", "A03": "TE", "A07": "CS"}},
+    "S7": {"order": ("A07", "A03", "A04", "A02"), "conditions": {"A07": "CS", "A03": "TE", "A04": "BL", "A02": "SE"}},
+    "S8": {"order": ("A04", "A07", "A02", "A03"), "conditions": {"A04": "TE", "A07": "SE", "A02": "CS", "A03": "BL"}},
 }
-PARTICIPANTS = {
-    f"P{i:02d}": f"G{((i - 1) // 6) + 1}" for i in range(1, 25)
-}
+PARTICIPANTS = {}
+for i in range(1, 25):
+    seq_idx = (i - 1) // 3 + 1
+    PARTICIPANTS[f"P{i:02d}"] = f"S{seq_idx}"
 STAGE_ORDER = ("instruction", "reading", "cra", "aca", "ctia", "workload")
 FINAL_STAGE_ORDER = ("preference", "interview", "complete")
 QUESTION_GROUP_ORDER = ("cra", "aca", "ctia")
