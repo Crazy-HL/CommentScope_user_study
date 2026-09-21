@@ -3,7 +3,7 @@
     <section class="card picker-card">
       <p class="eyebrow">CommentScope</p>
       <h1>评论阅读实验</h1>
-      <p class="lead">请选择研究者分配给你的参与者编号。编号范围为 P01–P24。</p>
+      <p class="lead">请选择研究者分配给你的参与者编号。</p>
       <label for="participant-select">参与者编号</label>
       <select id="participant-select" v-model="selected" :disabled="loading">
         <option value="" disabled>请选择</option>

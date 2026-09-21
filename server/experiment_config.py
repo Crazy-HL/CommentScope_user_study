@@ -155,6 +155,11 @@ PARTICIPANTS = {}
 for i in range(1, 25):
     seq_idx = (i - 1) // 3 + 1
     PARTICIPANTS[f"P{i:02d}"] = f"S{seq_idx}"
+
+# 重测参与者（不影响原数据，使用相同的序列分配）
+PARTICIPANTS["P08(2)"] = "S3"  # 与原P08同序列
+PARTICIPANTS["P19(2)"] = "S7"  # 与原P19同序列
+PARTICIPANTS["P23(2)"] = "S8"  # 与原P23同序列
 STAGE_ORDER = ("instruction", "reading", "cra", "aca", "ctia", "workload")
 FINAL_STAGE_ORDER = ("preference", "interview", "complete")
 QUESTION_GROUP_ORDER = ("cra", "aca", "ctia")
@@ -216,11 +221,13 @@ def build_participant_plan(participant_id: str, materials=None) -> Dict:
 
 def validate_allocation(plans: List[Dict]) -> List[str]:
     errors = []
-    if len(plans) != 24:
-        errors.append(f"expected 24 plans, got {len(plans)}")
+    # 只验证原始24个参与者的拉丁方平衡，重测参与者不影响设计
+    base_plans = [p for p in plans if not p.get("participant_id", "").endswith("(2)")]
+    if len(base_plans) != 24:
+        errors.append(f"expected 24 base plans, got {len(base_plans)}")
     seen = set()
     cell_counts = {(article, condition): 0 for article in ARTICLE_IDS for condition in CONDITION_CODES}
-    for plan in plans:
+    for plan in base_plans:
         pid = plan.get("participant_id")
         if pid in seen:
             errors.append(f"duplicate participant {pid}")
