@@ -1,6 +1,7 @@
 const { defineConfig } = require("@vue/cli-service");
 
 module.exports = defineConfig({
+  publicPath: '/comment_scope/',
   transpileDependencies: true,
   devServer: {
     proxy: {

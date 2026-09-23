@@ -19,29 +19,29 @@ function query(filters = {}) {
 
 const adminApi = {
   login(username, password) {
-    return unwrap(http.post("/api/admin/login", { username, password }));
+    return unwrap(http.post("api/admin/login", { username, password }));
   },
   me() {
-    return unwrap(http.get("/api/admin/me"));
+    return unwrap(http.get("api/admin/me"));
   },
   logout() {
-    return unwrap(http.post("/api/admin/logout", {}));
+    return unwrap(http.post("api/admin/logout", {}));
   },
   summary(filters) {
-    return unwrap(http.get("/api/admin/summary", { params: query(filters) }));
+    return unwrap(http.get("api/admin/summary", { params: query(filters) }));
   },
   analysis(filters) {
-    return unwrap(http.get("/api/admin/analysis", { params: query(filters) }));
+    return unwrap(http.get("api/admin/analysis", { params: query(filters) }));
   },
   dataQuality(filters) {
-    return unwrap(http.get("/api/admin/data-quality", { params: query(filters) }));
+    return unwrap(http.get("api/admin/data-quality", { params: query(filters) }));
   },
   exportData(format = "csv", dataset = "analysis") {
     const params = new URLSearchParams({ format, dataset });
-    return unwrap(http.get(`/api/admin/export?${params.toString()}`, { responseType: "blob" }));
+    return unwrap(http.get(`api/admin/export?${params.toString()}`, { responseType: "blob" }));
   },
   resetParticipant(participantId) {
-    return unwrap(http.post(`/api/admin/reset/${encodeURIComponent(participantId)}`, {}));
+    return unwrap(http.post(`api/admin/reset/${encodeURIComponent(participantId)}`, {}));
   }
 };
 
